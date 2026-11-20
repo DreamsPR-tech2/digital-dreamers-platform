@@ -1,0 +1,11 @@
+.DS_Store
+node_modules/
+.next/
+out/
+dist/
+*.tsbuildinfo
+.env*
+!.env.example
+supabase/.temp/
+supabase/.branches/
+supabase/.dev-users.local.json
