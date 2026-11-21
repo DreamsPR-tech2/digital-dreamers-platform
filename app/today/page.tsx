@@ -45,7 +45,7 @@ function Today() {
           <p>Today is Unit 3 · We Help! Run the board from the iPad, record each child as you go, and tomorrow’s plan builds itself.</p></div>
         <div className="row" style={{ justifyContent: 'flex-end' }}>
           <Link href="/lesson/" className="btn red big"><Ico n="play" s={16} c="#fff" fill /> {started ? 'Continue the lesson' : 'Start the lesson'}</Link>
-          <Link href="/screen/" className="btn white big"><Ico n="check" s={18} /> Quick Check</Link></div>
+          <Link href="/assess/" className="btn white big"><Ico n="check" s={18} /> Assess</Link></div>
         <div className="deco"><span className="shapes lg"><i className="sq" /><i className="ci" /><i className="tr" /></span></div>
       </div>
 
@@ -53,7 +53,7 @@ function Today() {
 
       <div className="stats">
         <div className="stat" style={{ ['--tb' as string]: 'var(--red-soft)', ['--tc' as string]: '#B52A36' }}><span className="ic"><Ico n="people" s={24} /></span><div><small>Here today</small><b>{marked ? here : '–'} <em>/ {list.length}</em></b></div></div>
-        <div className="stat"><span className="ic"><Ico n="check" s={24} /></span><div><small>Quick Check</small><b>{sm.screened} <em>/ {list.length}</em></b></div></div>
+        <div className="stat"><span className="ic"><Ico n="check" s={24} /></span><div><small>Primary screen</small><b>{sm.screened} <em>/ {list.length}</em></b></div></div>
         <div className="stat" style={{ ['--tb' as string]: 'var(--teal-soft)', ['--tc' as string]: 'var(--teal-d)' }}><span className="ic"><Ico n="trend" s={24} /></span><div><small>Box observations</small><b>{Math.round((obsN / obsMax) * 100)}%</b></div></div>
         <div className="stat" style={{ ['--tb' as string]: 'var(--plum-soft)', ['--tc' as string]: '#5B389A' }}><span className="ic"><Ico n="board" s={24} /></span><div><small>Board</small><b style={{ fontSize: '1.05em' }}>{rt.connected ? `Box ${cur} · ${c.boxes[cur - 1]?.title}` : 'Not open'}</b></div></div>
         <div className="stat"><div style={{ width: '100%' }}><small>Groups (readiness)</small>

@@ -6,7 +6,7 @@ import { homeOf, ROLES } from '@/components/Shell';
 import { Shapes, Toaster, toast, Wordmark } from '@/components/ui';
 
 const STEPS = [
-  ['Screen', 'Big 5 checklist three times a year, plus the lesson’s Quick Check'],
+  ['Screen', 'Big 5 checklist three times a year, plus the lesson’s primary screen'],
   ['Teach', 'Drive the classroom board from the iPad, box by box'],
   ['Track', 'Every child, every box, live: as it happens in the lesson'],
   ['Adapt', 'Tomorrow’s plan built from today, ready on the board'],

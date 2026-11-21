@@ -7,15 +7,15 @@ import { Ico, Shapes, Toaster, Wordmark } from './ui';
 
 export const ROLES: { id: Me['role']; label: string; home: string; d: string }[] = [
   { id: 'lead', label: 'Lesson lead', home: '/lesson/', d: 'Drives the board · attendance, Brain Break, game, reader' },
-  { id: 'screener', label: 'Screener', home: '/screen/', d: 'Quick Check one-to-one · second screen' },
-  { id: 'teacher', label: 'Classroom teacher', home: '/stop/', d: 'Stop check during the game · class overview' },
+  { id: 'screener', label: 'Assistant · Assess', home: '/assess/', d: 'By part scoring, primary screen, stop check and second screen' },
+  { id: 'teacher', label: 'Classroom teacher', home: '/assess/stop/', d: 'Stop check during the game · class overview' },
   { id: 'tech', label: 'Tech support', home: '/results/', d: 'Results, sync and setup' },
 ];
 export const homeOf = (m: Me | null) => ROLES.find(r => r.id === m?.role)?.home || '/today/';
 
-type Tab = 'today' | 'lesson' | 'screen' | 'stop' | 'results' | 'tomorrow' | 'class' | 'big5' | 'setup' | 'signin';
+type Tab = 'today' | 'lesson' | 'assess' | 'results' | 'tomorrow' | 'class' | 'big5' | 'setup' | 'signin';
 const NAV: (readonly [Tab, string] | 'sep')[] = [
-  ['today', 'Today'], 'sep', ['lesson', 'Lesson'], ['screen', 'Quick Check'], ['stop', 'Stop check'], 'sep',
+  ['today', 'Today'], 'sep', ['lesson', 'Lesson'], ['assess', 'Assess'], 'sep',
   ['results', 'Results'], ['tomorrow', 'Tomorrow'], 'sep', ['class', 'Class'], ['big5', 'Big 5'],
 ];
 
@@ -51,7 +51,7 @@ export default function Shell({ tab, children, gate = true }: { tab: Tab; childr
   else if (needSignIn) body = <p className="empty">Opening sign-in…</p>;
   else if (gate && synced && !st!.get().session.id) body = <p className="empty">Loading the lesson…</p>;
 
-  const re = ok && !needSignIn ? summary().rescreen_list.length : 0;
+  const re = ok && !needSignIn ? summary().students.filter(r => r.complete && r.rescreen_needed && !r.rescreen_done).length : 0; // second screens still waiting
   const demo = ok && st!.get().demo;
   return (
     <>
@@ -62,7 +62,7 @@ export default function Shell({ tab, children, gate = true }: { tab: Tab; childr
             {NAV.map((n, i) => n === 'sep' ? <span key={i} className="sep" /> :
               <Link key={n[0]} href={`/${n[0]}/`} className={tab === n[0] ? 'on' : ''}>
                 {n[0] === 'lesson' && rt.connected ? <span className="live" title="Board connected" /> : null}
-                {n[1]}{n[0] === 'screen' && re ? <span className="badge" title="Second screen waiting">{re}</span> : null}
+                {n[1]}{n[0] === 'assess' && re ? <span className="badge" title="Second screen waiting">{re}</span> : null}
               </Link>)}
           </nav>
           <div className="hright">

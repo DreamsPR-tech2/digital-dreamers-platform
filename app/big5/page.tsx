@@ -9,7 +9,7 @@ import { Avatar } from '@/components/ui';
 
 export default function Page() { const rt = useRuntime(); return <Shell tab="big5">{rt.ready ? <Big5 /> : null}</Shell>; }
 
-const QC_LABEL: Record<string, string> = { a1: 'Quick Check 1 · point to the 5 words', a2: 'Quick Check 2 · say the action', a3: 'Quick Check 3 · 2-step direction', a4: 'Quick Check 4 · /h/ first sound', a5: 'Quick Check 5 · “We help!”', bonus: 'Quick Check bonus · “I see a ___”' };
+const QC_LABEL: Record<string, string> = { a1: 'Primary screen 1 · point to the 5 words', a2: 'Primary screen 2 · say the action', a3: 'Primary screen 3 · 2-step direction', a4: 'Primary screen 4 · /h/ first sound', a5: 'Primary screen 5 · “We help!”', bonus: 'Primary screen bonus · “I see a ___”' };
 
 function Big5() {
   const router = useRouter(), list = students(), c = C();

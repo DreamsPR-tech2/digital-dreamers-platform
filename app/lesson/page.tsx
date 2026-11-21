@@ -1,7 +1,7 @@
 'use client';
 /* Lesson (lesson lead): drives the classroom board. Every control from the pilot portal's Lesson tab, unchanged in
  * behaviour (same board commands, same logs), with the live class panel next to it. */
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Shell from '@/components/Shell';
 import ClassPulse from '@/components/ClassPulse';
 import { boardImg, boardUrl, C, meName, setField, St, students, summary, useRuntime, type BoardState, type LessonData } from '@/lib/runtime';
@@ -20,21 +20,33 @@ function GameTimeline({ act }: { act: LessonData['activity'] }) {
 }
 
 /* "What is the date?": fill the answer in on the board piece by piece (weekday → month → day → year), or all at once. */
+// The date controls always show. When the board isn't connected yet, the step is kept here and sent as soon as it connects.
+let pendingDateStep: number | null = null;
+function datePieces(bs: Partial<BoardState>) {
+  if (bs.dateParts) return bs.dateParts;
+  const d = new Date(St().get().session.date + 'T12:00:00'); // the session date, until the board reports its own
+  return { weekday: d.toLocaleDateString('en-US', { weekday: 'long' }), month: d.toLocaleDateString('en-US', { month: 'long' }), day: d.getDate(), year: d.getFullYear() };
+}
 function DateSteps({ bs }: { bs: Partial<BoardState> }) {
-  const p = bs.dateParts, step = bs.dateStep ?? (bs.dateShown ? 4 : 0);
-  if (!p) return <div className="stack sm"><h3>What is the date?</h3><p className="small muted">Open the board to fill in the date.</p></div>;
+  const { connected } = useRuntime();
+  useEffect(() => { if (connected && pendingDateStep !== null) { send('setDateStep', pendingDateStep); pendingDateStep = null; } }, [connected]);
+  const p = datePieces(bs);
+  const step = !connected && pendingDateStep !== null ? pendingDateStep : bs.dateStep ?? (bs.dateShown ? 4 : 0);
+  const [, rerender] = useState(0);
+  const setStep = (n: number) => { if (connected) send('setDateStep', n); else { pendingDateStep = n; rerender(x => x + 1); } };
   const pieces: [string, string][] = [['Weekday', p.weekday], ['Month', p.month], ['Day', String(p.day)], ['Year', String(p.year)]];
   const next = step < 4 ? pieces[step] : null;
   return (
     <div className="stack sm">
       <div className="spread"><h3>What is the date?</h3><span className="pill">{step} of 4 filled in</span></div>
-      <p className="small muted">Ask the class one piece at a time. Each tap writes the next piece on the board.</p>
+      <p className="small muted">{connected ? 'Ask the class one piece at a time. Each tap writes the next piece on the board.'
+        : 'The board isn’t open yet. You can still fill the date in here; it appears on the board as soon as the board opens.'}</p>
       <div className="datesteps">{pieces.map(([k, v], i) => <button key={k} type="button" className={'dstep' + (i < step ? ' on' : i === step ? ' next' : '')} aria-pressed={i < step}
-        onClick={() => send('setDateStep', i < step && i === step - 1 ? i : i + 1)}><small>{i + 1} · {k}</small><b>{v}</b></button>)}</div>
+        onClick={() => setStep(i < step && i === step - 1 ? i : i + 1)}><small>{i + 1} · {k}</small><b>{v}</b></button>)}</div>
       <div className="row">
-        {next ? <button type="button" className="btn pri big grow" onClick={() => send('setDateStep', step + 1)}>Next: {next[0].toLowerCase()} · {next[1]} →</button> : <span className="datebig grow">{bs.date}</span>}
-        {step < 4 ? <button type="button" className="btn" onClick={() => send('setDateStep', 4)}>Fill in all</button> : null}
-        {step > 0 ? <button type="button" className="btn ghost" onClick={() => send('setDateStep', 0)}>Clear</button> : null}
+        {next ? <button type="button" className="btn pri big grow" onClick={() => setStep(step + 1)}>Next: {next[0].toLowerCase()} · {next[1]} →</button> : <span className="datebig grow">{`${p.weekday}, ${p.month} ${p.day}, ${p.year}`}</span>}
+        {step < 4 ? <button type="button" className="btn" onClick={() => setStep(4)}>Fill in all</button> : null}
+        {step > 0 ? <button type="button" className="btn ghost" onClick={() => setStep(0)}>Clear</button> : null}
       </div>
     </div>);
 }
@@ -54,7 +66,7 @@ function WhoStopped({ bs }: { bs: Partial<BoardState> }) {
         : !last ? <p className="small muted">Press STOP to start the first stop. Watching: {watched.map(s => s.name).join(', ')}.</p>
         : <div className="stack sm">{watched.map(s => { const v = (s.stop || [])[n - 1];
             return <div key={s.id} className="row" style={{ flexWrap: 'nowrap' }}><Avatar name={s.name} /><b className="grow" style={{ color: 'var(--navy)' }}>{s.name}</b>
-              <span className="yn"><button type="button" className={'btn y' + (v === 'Y' ? ' on' : '')} onClick={() => mark(s.id, 'Y')}>Stopped</button><button type="button" className={'btn n' + (v === 'N' ? ' on' : '')} onClick={() => mark(s.id, 'N')}>Kept going</button></span></div>; })}
+              <span className="yn"><button type="button" className={'btn y' + (v === 'Y' ? ' on' : '')} onClick={() => mark(s.id, 'Y')}>Yes · stopped</button><button type="button" className={'btn n' + (v === 'N' ? ' on' : '')} onClick={() => mark(s.id, 'N')}>No · kept going</button></span></div>; })}
             <p className="tiny muted">A blank is not a No: leave it if you could not see. These marks are the same ones on the Stop check tab.</p></div>}
       {watched.length ? <details><summary className="small">Change who you are watching ({watched.length})</summary><div style={{ marginTop: 8 }}>{picker}</div></details> : null}
     </div>);
@@ -66,7 +78,7 @@ function Controls({ bs }: { bs: Partial<BoardState> }) {
   if (!box) return null;
 
   if (box.id === 'intro') {
-    const here = list.filter(s => s.present === true).length, marked = list.filter(s => s.present === true || s.present === false).length, part = bs.introPart || 'attend';
+    const here = list.filter(s => s.present === true).length, marked = list.filter(s => s.present === true || s.present === false).length, part = St().board.connected() ? bs.introPart || 'all' : 'all'; // no board yet: show both, so the date can still be filled in
     const setPresent = (id: string, v: boolean) => St().update(x => { const s = x.students.find(y => y.id === id); if (!s) return;
       if (s.present === v) { delete s.present; delete s.present_at; } else { s.present = v; s.present_at = St().now(); } });
     const show = (p: string) => part === 'all' || part === p;
@@ -159,8 +171,8 @@ function Controls({ bs }: { bs: Partial<BoardState> }) {
     };
     return <>
       <h3>Reader level</h3>
-      <p className="small">{rec ? <>Quick Check recommends <b>Level {rec}</b> ({sm.screened} screened · {[1, 2, 3].map(L => `L${L}: ${sm.level_counts[L as 1]}`).join(', ')}).</> : 'No screens saved yet.'} Board shows: <b>{curL ? 'Level ' + curL : 'no level'}</b>.</p>
-      <div className="levelpick">{rec ? <button type="button" className="btn pri" onClick={() => choose(rec, 'quick check')}>Use Level {rec} from the Quick Check</button> : null}
+      <p className="small">{rec ? <>The primary screen recommends <b>Level {rec}</b> ({sm.screened} screened · {[1, 2, 3].map(L => `L${L}: ${sm.level_counts[L as 1]}`).join(', ')}).</> : 'No screens saved yet.'} Board shows: <b>{curL ? 'Level ' + curL : 'no level'}</b>.</p>
+      <div className="levelpick">{rec ? <button type="button" className="btn pri" onClick={() => choose(rec, 'quick check')}>Use Level {rec} from the primary screen</button> : null}
         {[1, 2, 3].map(L => <button key={L} type="button" className={'btn' + (curL === L ? ' on' : '') + (rec === L ? ' rec' : '')} onClick={() => choose(L, 'override')}>Level {L}</button>)}</div>
       <div className="row"><button type="button" className="btn" onClick={() => send('turn', -1)}>← Page</button><button type="button" className="btn" onClick={() => send('turn', 1)}>Page →</button></div>
     </>;

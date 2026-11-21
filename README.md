@@ -22,8 +22,7 @@ The board is at `/board/board.html` (add `?date=2026-12-01` to rehearse).
 |---|---|---|
 | Today | everyone | Unit timeline (Unit 1 → Unit 2 Nov 10 → today → tomorrow), live tiles, who to watch, the lesson box by box |
 | Lesson | lesson lead | Drives the classroom board + **class panel**: every child, every box, recorded live (✓ ◐ ○) |
-| Quick Check | screener | Toolkit v2.0: 5 items 0–3, rubric, 5-second wait, item 1 by tapping the Power Words the child gets, bonus, mode, engagement, second screen |
-| Stop check | classroom teacher | Watched children, Yes/No per STOP (one stop per STOP called in the game; add or remove stops), help behaviours, notes |
+| Assess | assistant (screener) · classroom teacher | One tab, four parts, in this order: **By part** (default; every child × every board part: ✓ ◐ ○ buttons for the part on the board now, a dropdown for finished parts, blank for later parts; same data as the Lesson class panel) · **Primary screen** (the toolkit's Quick Check: 5 items 0–3, rubric, 5-second wait, item 1 by tapping the Power Words the child gets, bonus, mode, engagement) · **Stop check** (follows the lesson: shows what the board is doing, jumps to each new STOP; Yes/No per stop; add or remove stops) · **Second screen** (flagged children and items, start → end) |
 | Results | tech / everyone | Totals, levels, stop check, Big 5 evidence by domain, game log, reader-level log, CSV (no names) |
 | Tomorrow | lesson lead | Plan for the next school day, box by box, each change with its reason; groups; per-child focus; family note; **Set up the board for tomorrow** |
 | Class · Child | everyone | Profiles, supports, readiness group, Big 5 Sep → Dec, last four lessons, checklist with where each mark came from |
@@ -63,7 +62,7 @@ When the pilot changes one of these files, copy it over again (`cmp` should only
 - **Game:** GO and STOP only (GO: everyone moves; STOP: freeze; GO again). No MOVE cue.
 
 ### Lesson-day changes from the pilot portal (platform only)
-- Quick Check item 1: the screener taps the Power Words the child **gets**; the score follows. Still stored as the
+- Primary screen (the toolkit's Quick Check) item 1: the screener taps the Power Words the child **gets**; the score follows. Still stored as the
   pilot's `a1_missed`, so the data and CSV are unchanged. No card mat.
 - Lesson: right after STOP, the lead (or whoever has the Lesson screen) marks which watched children stopped.
   The marks are the same ones as on the Stop check tab.
@@ -81,14 +80,14 @@ Tomorrow's saved plan is kept on the iPad that saved it (`localStorage`, `dreams
 ## Rules
 - **Naming:** "Big 5" always means Head Start's five domains. The five lesson words (help, do, see, go, stop) are
   **Power Words**. The pilot files call them "Big 5 words"; the platform rewrites that wording when it displays it.
-- **Big 5 evidence** (`lib/big5.ts`): Quick Check 1 → Oral Language (key words), 2 and 5 → Oral Language (phrases),
+- **Big 5 evidence** (`lib/big5.ts`): primary screen item 1 → Oral Language (key words), 2 and 5 → Oral Language (phrases),
   3 → two-step direction, 4 → Phonological Awareness (initial sound); boxes: Today → greeting, Plan → visual schedule,
   Move together → names helpers, Word wall → key words, Letters → letter–sound, Read together → who/what,
   Comprehension → First · Next · Last. Brain Break and stop check are regulation / executive function, outside the Big 5.
   The best evidence per indicator counts (strengths-based); a second screen replaces the start score for that item.
 - **Group standard** (unchanged from the Nov 10 demo): readiness = 70% Big 5 composite + 30% last-four-lesson
   independence. Advanced ≥ 68 · Progressing 45–67 · Beginning < 45.
-- **Tomorrow's plan** (`lib/plan.ts`): built from the Quick Check flags, stop check, box observations and attendance.
+- **Tomorrow's plan** (`lib/plan.ts`): built from the primary screen flags, stop check, box observations and attendance.
   Every changed or new line states its reason.
 - Children whose names match no profile (a real roster) get no invented history: only what is recorded live.
 
@@ -104,5 +103,5 @@ Tomorrow's saved plan is kept on the iPad that saved it (`localStorage`, `dreams
 - Spanish teacher UI (the Nov 10 demo had an ES toggle; this build is English for teachers, bilingual on the board).
 - Brand fonts (Baloo 2 / Nunito per the toolkit); Poppins for now, as in the pilot.
 - Design system artifact → tokens (colors here come from the Nov 10 demo).
-- Indicator wording and the Quick Check → Big 5 mapping to confirm with Kristen & Cari.
+- Indicator wording and the primary screen → Big 5 mapping to confirm with Kristen & Cari.
 - Saved plans to sync across iPads (today they stay on the iPad that saved them).

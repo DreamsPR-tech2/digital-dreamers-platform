@@ -60,7 +60,7 @@ export function generatePlan(inp: PlanInput): Plan {
   add('intro', 'Who is here? · calendar with the full weekday');
   const away = students.filter(s => s.present === false);
   if (away.length) { add('intro', `Welcome back ${names(away)}: one-minute Power Words catch-up with a partner`, 'new', `${away.length} not here today`);
-    away.forEach(s => P.kid[s.id].push('Catch up on today: Power Words + Quick Check')); }
+    away.forEach(s => P.kid[s.id].push('Catch up on today: Power Words + primary screen')); }
 
   /* 2 · Plan */
   add('today', 'Plan with the six pictures · point and say each part');
@@ -115,8 +115,8 @@ export function generatePlan(inp: PlanInput): Plan {
 
   /* 7 · Read together */
   const L = sm.class_level;
-  if (L) add('read', `Reader Level ${L} for the whole class`, 'same', `Quick Check class level ${L} (L1 ${sm.level_counts[1]} · L2 ${sm.level_counts[2]} · L3 ${sm.level_counts[3]})`);
-  else add('read', 'Reader level from tomorrow’s Quick Check');
+  if (L) add('read', `Reader Level ${L} for the whole class`, 'same', `Primary screen class level ${L} (L1 ${sm.level_counts[1]} · L2 ${sm.level_counts[2]} · L3 ${sm.level_counts[3]})`);
+  else add('read', 'Reader level from tomorrow’s primary screen');
   const model = flagged('needs_model');
   if (model.length) { add('read', `Partner echo, then fade support: ${names(model)}`, 'chg', `${model.length} understand but need a model`); model.forEach(s => P.kid[s.id].push('Partner echo, then fade')); }
   const l1 = students.filter(s => res(s)?.start_level === 1), l3 = students.filter(s => res(s)?.start_level === 3);

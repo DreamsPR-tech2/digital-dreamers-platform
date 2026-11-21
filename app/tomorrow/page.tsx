@@ -29,7 +29,7 @@ function Tomorrow() {
   const anything = list.some(s => s.present !== undefined || Object.keys(s.obs || {}).length) || sm.screened > 0;
   if (!anything) return (
     <div className="card pad stack" style={{ textAlign: 'center', alignItems: 'center' }}>
-      <h2>Tomorrow’s plan</h2><p className="muted">Nothing is recorded for today yet. The plan is built from the lesson: attendance, box observations, Quick Check and stop check.</p>
+      <h2>Tomorrow’s plan</h2><p className="muted">Nothing is recorded for today yet. The plan is built from the lesson: attendance, box observations, primary screen and stop check.</p>
       <Link href="/lesson/" className="btn red big"><Ico n="play" s={16} c="#fff" fill /> Start the lesson</Link></div>);
 
   const setLine = (box: string, i: number, text: string) => setDraft(p => { const q: Plan = JSON.parse(JSON.stringify(p || P)); q.boxes[box][i].text = text; return q; });
@@ -64,7 +64,7 @@ function Tomorrow() {
           <div className="row noprint"><span className={'conn' + (rt.connected ? ' on' : '')}><i />{rt.connected ? 'Board connected' : 'Board not open'}</span>
             <button className="btn navy" type="button" disabled={!rt.connected} onClick={applyBoard}><Ico n="board" s={17} c="#fff" /> Set up the board for tomorrow</button></div></div>
         <div className="presets">
-          <div className="preset"><small>Reader level</small><b>{B.level ? `Level ${B.level}` : 'From the Quick Check'}</b></div>
+          <div className="preset"><small>Reader level</small><b>{B.level ? `Level ${B.level}` : 'From the primary screen'}</b></div>
           <div className="preset"><small>Brain Break</small><b>{bbName || 'Teacher picks'}</b></div>
           <div className="preset"><small>Word wall starts on</small><b>{c.words[B.word]?.en.toUpperCase()}</b></div>
           <div className="preset"><small>Letters start on</small><b>{c.letters[B.letter]?.L} · {c.letters[B.letter]?.word}</b></div>

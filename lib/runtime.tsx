@@ -136,6 +136,6 @@ export function RuntimeProvider({ children }: { children: ReactNode }) {
 }
 export const useRuntime = () => useContext(Ctx);
 
-/** Quick Check flag wording for the platform. scoring.js stays exactly as the pilot ships it; it calls the five
+/** Primary screen (toolkit Quick Check) flag wording for the platform. scoring.js stays exactly as the pilot ships it; it calls the five
  * lesson words "Big 5 words", which the platform calls Power Words so they never get confused with the Big 5 domains. */
 export const flagText = (f: string) => (window.WeHelpScoring.FLAGS[f] || f).replace(/Big 5 words/g, 'Power Words');

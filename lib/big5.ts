@@ -50,17 +50,18 @@ export const MONTHS = ['Sep', 'Oct', 'Nov', 'Dec'];
 
 /* ---------- how the We Help! lesson becomes Big 5 evidence ---------- */
 /** One observation per board box (tap ✓ ◐ ○ on the class panel while the box is up). `b5: null` = outside the Big 5. */
-export const BOX_OBS: Record<string, { label: string; b5: string | null; short: string }> = {
-  intro: { label: 'Answers at “Who is here?”', b5: 'bk1', short: 'Here' },
-  today: { label: 'Follows the plan on the board', b5: 'bk4', short: 'Plan' },
-  ready: { label: 'Gets their body ready with the Brain Break', b5: null, short: 'Ready' },
-  move:  { label: 'Names who helps at the place', b5: 'bk2', short: 'Helper' },
-  wall:  { label: 'Shows or says the Power Words', b5: 'ol3', short: 'Words' },
-  pep:   { label: 'Links H, D, S, G to their sounds', b5: 'ak3', short: 'Letters' },
-  read:  { label: 'Answers who or what about the reader', b5: 'cp3', short: 'Reader' },
-  comp:  { label: 'Puts the story pictures in order', b5: 'cp4', short: 'Order' },
+/** `question`: what the screener answers for each child while that part is on (By part, in Assess). */
+export const BOX_OBS: Record<string, { label: string; question: string; b5: string | null; short: string }> = {
+  intro: { label: 'Answers at “Who is here?”', question: 'Did they respond to “Who is here?”', b5: 'bk1', short: 'Here' },
+  today: { label: 'Follows the plan on the board', question: 'Did they follow the plan on the board?', b5: 'bk4', short: 'Plan' },
+  ready: { label: 'Gets their body ready with the Brain Break', question: 'Did they get their body ready with the Brain Break?', b5: null, short: 'Ready' },
+  move:  { label: 'Names who helps at the place', question: 'Did they name who helps at the place?', b5: 'bk2', short: 'Helper' },
+  wall:  { label: 'Shows or says the Power Words', question: 'Did they show or say the Power Words?', b5: 'ol3', short: 'Words' },
+  pep:   { label: 'Links H, D, S, G to their sounds', question: 'Did they link each letter to its sound?', b5: 'ak3', short: 'Letters' },
+  read:  { label: 'Answers who or what about the reader', question: 'Did they answer who or what about the reader?', b5: 'cp3', short: 'Reader' },
+  comp:  { label: 'Puts the story pictures in order', question: 'Did they put the story pictures in order?', b5: 'cp4', short: 'Order' },
 };
-/** Quick Check items → Big 5 indicators (Toolkit v2.0 items, scored 0–3). */
+/** Primary screen (toolkit Quick Check) items → Big 5 indicators (Toolkit v2.0 items, scored 0–3). */
 export const QC_B5: Record<string, string> = { a1: 'ol3', a2: 'ol2', a3: 'ol1', a4: 'pa3', a5: 'ol2', bonus: 'ol2' };
 export const OBS_TO_B5: Record<string, B5Status> = { ok: 'obs', sup: 'emg', no: 'not' };
 export const scoreToB5 = (v: number): B5Status => (v >= 3 ? 'obs' : v === 2 ? 'emg' : 'not');
@@ -83,7 +84,7 @@ export function todayEvidence(s: LiveStudent): Record<string, Evidence> {
     const n = k === 'bonus' ? null : k.slice(1);
     const re = n ? (s as Record<string, unknown>)['r' + n] : null;
     const v = given(re) ? re : (s as Record<string, unknown>)[k];
-    if (given(v)) add(ind, scoreToB5(v), k === 'bonus' ? 'Quick Check · bonus' : `Quick Check · item ${n}${given(re) ? ' (2nd screen)' : ''}`);
+    if (given(v)) add(ind, scoreToB5(v), k === 'bonus' ? 'Primary screen · bonus' : `Primary screen · item ${n}${given(re) ? ' (2nd screen)' : ''}`);
   }
   // the teacher's own checklist mark (child record → Big 5) always wins over automatic evidence
   for (const [ind, st] of Object.entries(s.b5 || {})) if (INDICATOR[ind] && st) out[ind] = { ind, status: st, source: 'Teacher observation' };
@@ -116,7 +117,7 @@ export function domainScore(child: Child | null, ev: Record<string, Evidence>, d
 }
 export function composite(child: Child | null, ev: Record<string, Evidence>) { return avg(BIG5.map(d => domainScore(child, ev, d.id))); }
 
-/** Today's independence: share of box observations marked ✓ and Quick Check items scored 3. */
+/** Today's independence: share of box observations marked ✓ and primary screen items scored 3. */
 export function todayIndependence(s: LiveStudent): number | null {
   let ok = 0, n = 0;
   for (const v of Object.values(s.obs || {})) { n++; if (v === 'ok') ok++; }

@@ -1,6 +1,6 @@
 'use client';
 /* Class panel: every child, live, through the lesson.
- * One row per child: here/not here, a dot per board box (✓ ◐ ○), Quick Check status and stop-check marks.
+ * One row per child: here/not here, a dot per board box (✓ ◐ ○), primary screen status and stop-check marks.
  * The ✓ ◐ ○ buttons record the observation for the box that is up on the board right now; it is saved in the
  * shared store, so every iPad (and Results, Tomorrow, Big 5) sees it at once.
  */
@@ -33,7 +33,7 @@ export default function ClassPulse({ box, title = 'Class · live' }: { box: stri
       <div>
         <div className="prow phead" aria-hidden="true">
           <span />
-          <span>Child · boxes 1–8 · Quick Check</span>
+          <span>Child · boxes 1–8 · primary screen</span>
           {item ? <div className="obsbtns">{OBS.map(([k, ic, l]) => <span key={k} className={'obh ' + k}><b>{ic}</b>{l}</span>)}</div> : <span />}
         </div>
         {list.map(s => {

@@ -1,5 +1,5 @@
 'use client';
-/* Child record: profile & communication, supports, today live (boxes + Quick Check + stop check), Big 5 checklist
+/* Child record: profile & communication, supports, today live (boxes + primary screen + stop check), Big 5 checklist
  * with where each mark came from, progress Sep → Dec, last four lessons, and tomorrow's focus. */
 import Link from 'next/link';
 import { Suspense, useMemo } from 'react';
@@ -63,11 +63,11 @@ function Record({ s, focus }: { s: Student; focus: string[] }) {
           return <div key={b.id} className="bx" style={{ ['--bc' as string]: `var(--${b.color})`, background: v === 'ok' ? 'var(--teal-soft)' : v === 'sup' ? 'var(--gold-soft)' : v === 'no' ? 'var(--no-soft)' : '#fff' }}>
             <i>{b.n}</i><b>{b.title}</b><span className="tiny muted">{v ? OBS_L[v] : 'Not recorded'}</span></div>; })}</div>
         <div className="row" style={{ gap: 8 }}>
-          <span className="small"><b>Quick Check:</b></span>
+          <span className="small"><b>Primary screen:</b></span>
           {r.complete ? <><span className="pill">{r.start_total}/15</span><LevelPill L={r.start_level} />{r.target_met ? <span className="pill ok">Target met</span> : <span className="pill no">Target not yet</span>}
             {r.rescreen_needed ? (r.rescreen_done ? <span className="pill ok">2nd screen {r.start_total} → {r.end_total}</span> : <span className="pill re">2nd screen: items {r.flagged_items.join(', ')}</span>) : null}</>
             : <span className="pill wait">{r.missing.length < 5 ? `In progress · missing ${r.missing.join(', ')}` : 'Not screened'}</span>}
-          <Link href={`/screen/?id=${s.id}&step=${r.complete ? 7 : 0}`} className="small">Open the screen →</Link>
+          <Link href={`/assess/primary/?id=${s.id}&step=${r.complete ? 7 : 0}`} className="small">Open the screen →</Link>
           {st.length ? <span className="small" style={{ marginLeft: 'auto' }}><b>Stop check:</b> Yes on {st.filter(v => v === 'Y').length} of {st.length}</span> : null}
         </div>
         {r.flags.length ? <div className="reco">{r.flags.map(f => <div key={f}>{flagText(f)}</div>)}</div> : null}

@@ -38,7 +38,7 @@ function Results() {
         <div className="stat"><small>Second screen</small><b>{re.length}<em> of {sm.rescreen_list.length} done</em></b></div>
       </div>
       <div className="g2">
-        <div className="card pad stack sm"><h3>What to do tomorrow · Quick Check flags</h3>
+        <div className="card pad stack sm"><h3>What to do tomorrow · primary screen flags</h3>
           {sm.recommendations.length ? <div className="reco">{sm.recommendations.map(r => <div key={r.flag}>{flagText(r.flag)}{r.students ? <small> ({r.students} of {sm.screened} children)</small> : null}</div>)}</div> : <p className="muted small">No flags yet.</p>}
           {re.length ? <p className="small muted">Second-screen results are performance on reassessed items only, not whole-class growth.</p> : null}
           <Link href="/tomorrow/" className="small">See the full plan for tomorrow, box by box →</Link></div>
@@ -47,7 +47,7 @@ function Results() {
             <span style={{ color: 'var(--navy)' }}><span className="sw" style={{ background: b.color }} /> {b.name}</span>
             <span className="tr"><i style={{ width: (a ?? 0) + '%', background: b.color }} /></span>
             <span>{a === null ? 'no evidence' : `${LEVELS[levelOf(a)!]} · ${n}`}</span></div>)}
-          <p className="tiny muted">From the box observations and Quick Check items. Stop check and Brain Break are recorded outside the Big 5.</p></div>
+          <p className="tiny muted">From the box observations and primary screen items. Stop check and Brain Break are recorded outside the Big 5.</p></div>
       </div>
       <div className="card pad stack sm"><h3>Brain Break and game</h3>
         <p className="small"><b>Brain Break:</b> {act.brainBreaks.length ? act.brainBreaks.map(u => `${bbName(u.id)} (${fmtTime(u.at)}${u.by ? ', ' + u.by : ''})`).join(' · ') : 'none picked'}</p>

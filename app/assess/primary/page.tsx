@@ -1,10 +1,11 @@
 'use client';
-/* Quick Check (screener): the pilot portal's Screen tab, same rules (scoring.js, screen-items.js), same fields.
+/* Primary screen (assistant; the toolkit's Quick Check): the pilot portal's Screen tab, same rules (scoring.js, screen-items.js), same fields.
  * Roster → one student → one item per screen → bonus → response mode & engagement → Save → summary.
  * Second screen: flagged items only (Level 1–2, scored 0–1). A missing item is never a zero. */
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Shell from '@/components/Shell';
+import AssessNav from '@/components/AssessNav';
 import { given, meName, result, setField, St, students, summary, useRuntime, type ScreenItem, type Student } from '@/lib/runtime';
 import { flagText } from '@/lib/runtime';
 import { INDICATOR, STATUS_ICON, todayEvidence, domainOf } from '@/lib/big5';
@@ -19,7 +20,7 @@ const ITEMS = () => window.WEHELP_ITEMS;
 const a1FromGot = (n: number) => (n === 5 ? 3 : n >= 3 ? 2 : n >= 1 ? 1 : 0);
 const firstOpenStep = (s: Student) => { for (let i = 0; i < 5; i++) if (!given(s[ITEMS()[i].key])) return i; return 5; };
 
-export default function Page() { return <Shell tab="screen"><Suspense fallback={null}><Screen /></Suspense></Shell>; }
+export default function Page() { return <Shell tab="assess"><Suspense fallback={null}><Screen /></Suspense></Shell>; }
 
 function Screen() {
   const rt = useRuntime(), q = useSearchParams();
@@ -37,22 +38,16 @@ function status(s: Student) {
 
 function Roster() {
   const router = useRouter(), sm = summary(), list = students(), d = St().get();
-  const order = window.WeHelpScoring.pickerOrder(list.map(St().toRec)).filter(i => sm.students[i].rescreen_needed && sm.students[i].complete);
   return (
     <div className="stack">
-      <div className="spread"><div><h1 style={{ fontSize: '1.6em' }}>Quick Check</h1><p className="muted small">One-to-one, about 2 minutes per child. Toolkit v2.0 · 5 items scored 0–3 · target 8 of 15.</p></div>
+      <AssessNav current="primary" />
+      <div className="spread"><p className="muted small">One-to-one, about 2 minutes per child. Toolkit v2.0 · 5 items scored 0–3 · target 8 of 15. Flagged children then appear under Second screen.</p>
         <div className="row"><span className="pill">{sm.screened} of {list.length} screened</span>{sm.class_level ? <><span className="pill">Class level so far</span><LevelPill L={sm.class_level} /></> : null}
           {d.demo && sampleReady(d) && !sm.screened ? <button type="button" className="btn ghost sm" onClick={() => { St().update(x => fillQuickCheck(x, St().now(), false)); toast('Sample screens for the 8 demo children'); }}>Fill sample screens</button> : null}</div></div>
       <div className="roster">{list.map(s => { const st = status(s); return (
-        <button type="button" key={s.id} className={'stu ' + st.cls} onClick={() => router.push(`/screen/?id=${s.id}&step=${result(s).complete ? STEP_SUM : firstOpenStep(s)}`)}>
+        <button type="button" key={s.id} className={'stu ' + st.cls} onClick={() => router.push(`/assess/primary/?id=${s.id}&step=${result(s).complete ? STEP_SUM : firstOpenStep(s)}`)}>
           <span className="top"><Avatar name={s.name} /><span><span className="muted tiny">#{s.no}</span><br /><b>{s.name}</b></span>{s.present === false ? <span className="pill wait" style={{ marginLeft: 'auto' }}>not here</span> : null}</span>
           <span className="row" style={{ gap: 5 }}>{st.pill}</span></button>); })}</div>
-      <div className="card pad stack sm">
-        <div className="spread"><h3>Second screen</h3><span className="muted small">Level 1 or 2 children, items scored 0 or 1 only</span></div>
-        {order.length ? <div className="chips">{order.map(i => { const s = list[i], r = sm.students[i];
-          return <button key={s.id} type="button" className={'btn' + (r.rescreen_done ? ' ghost' : ' warn')} onClick={() => router.push(`/screen/?id=${s.id}&step=0&re=1`)}>{r.rescreen_done ? '✓ ' : ''}{s.name} · items {r.flagged_items.join(', ')}</button>; })}</div>
-          : <p className="muted small">Nobody needs a second screen yet.</p>}
-      </div>
     </div>);
 }
 
@@ -64,12 +59,12 @@ function OneStudent({ id, step: step0, re }: { id: string; step: number | null; 
     if (!re && !s0.started_at) setField(id, x => { x.started_at = St().now(); });
     if (re && !s0.re_started_at) setField(id, x => { x.re_started_at = St().now(); });
   }, [id, re, s0]);
-  if (!s0) return <div className="empty">This child isn’t on the roster. <button className="btn" onClick={() => router.push('/screen/')}>Back to the roster</button></div>;
+  if (!s0) return <div className="empty">This child isn’t on the roster. <button className="btn" onClick={() => router.push(re ? '/assess/second/' : '/assess/primary/')}>Back to the roster</button></div>;
   const s = s0, r = result(s), all = ITEMS();
   const items = re ? r.flagged_items.map(n => all[n - 1]) : all;
   const last = re ? items.length : STEP_SUM;
   const step = step0 === null || isNaN(step0) ? 0 : step0;
-  const go = (n: number) => router.push(`/screen/?id=${id}&step=${n}${re ? '&re=1' : ''}`);
+  const go = (n: number) => router.push(`/assess/primary/?id=${id}&step=${n}${re ? '&re=1' : ''}`);
   const next = () => go(Math.min(step + 1, last));
 
   const score = (it: ScreenItem, v: number) => {
@@ -88,12 +83,12 @@ function OneStudent({ id, step: step0, re }: { id: string; step: number | null; 
   else if (!re && step === STEP_WRAP) body = <WrapView s={s} onPrev={() => go(step - 1)} onSave={() => {
     const miss = window.WeHelpScoring.missingItems(St().toRec(s)); if (miss.length) { toast('Score item ' + miss.join(', ') + ' first'); return; }
     setField(id, x => { x.finished_at = St().now(); x.screened_by = meName(); }); go(STEP_SUM); }} />;
-  else body = re ? <ReSummary s={s} onEdit={() => go(0)} onDone={() => router.push('/screen/')} /> :
-    <Summary s={s} onEdit={() => go(0)} onContinue={() => go(firstOpenStep(s))} onNextStu={() => { const nx = students().find(x => x.id !== id && !result(x).complete); router.push(nx ? `/screen/?id=${nx.id}&step=0` : '/screen/'); }} />;
+  else body = re ? <ReSummary s={s} onEdit={() => go(0)} onDone={() => router.push(re ? '/assess/second/' : '/assess/primary/')} /> :
+    <Summary s={s} onEdit={() => go(0)} onContinue={() => go(firstOpenStep(s))} onNextStu={() => { const nx = students().find(x => x.id !== id && !result(x).complete); router.push(nx ? `/assess/primary/?id=${nx.id}&step=0` : '/assess/primary/'); }} />;
 
   return (
     <div className="stack">
-      <div className="scr-top"><button className="btn ghost" type="button" onClick={() => router.push('/screen/')}>← Roster</button><Avatar name={s.name} /><span className="who">{s.name}</span>
+      <div className="scr-top"><button className="btn ghost" type="button" onClick={() => router.push(re ? '/assess/second/' : '/assess/primary/')}>← Roster</button><Avatar name={s.name} /><span className="who">{s.name}</span>
         {re ? <span className="pill re">Second screen</span> : null}<Clock s={s} re={re} /></div>
       <div className="steps">{dots}</div>
       <div className="card pad">{body}</div>
