@@ -56,6 +56,10 @@ When the pilot changes one of these files, copy it over again (`cmp` should only
 - **Plan (box 2):** each row uses the colour of the box it refers to.
 - **Calendar:** “What is the date? / ¿Qué fecha es hoy?” at the top, with the answer filling in beside it when the
   iPad fills in the date. No “Calendar” label and no line under the calendar.
+- **Date, piece by piece:** the iPad fills in the answer one piece at a time (weekday → month → day → year) with
+  `setDateStep(0–4)`; tapping the calendar or pressing D on the board adds the next piece. The weekday column lights up
+  with the weekday, the month header with the month, and today’s circle with the day. The pilot’s `showDate` still
+  fills it all at once.
 - **Game:** GO and STOP only (GO: everyone moves; STOP: freeze; GO again). No MOVE cue.
 
 ### Lesson-day changes from the pilot portal (platform only)

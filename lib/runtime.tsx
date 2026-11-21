@@ -44,6 +44,8 @@ export interface LessonData {
 }
 export interface BoardState {
   cur: number; flow: boolean; word: number; letter: number; open: boolean; date: string; dateShown: boolean; introPart: string;
+  /* platform board: how much of the date is filled in (0–4: weekday, month, day, year) and the pieces */
+  dateStep?: number; dateParts?: { weekday: string; month: string; day: number; year: number };
   here: number; total: number; names?: string[]; bb: string | null; phase: string; place: number | null; signal: string | null; spinning: boolean;
   round: number[]; level: number | null; page: number; seq: { placed: number[]; checked: boolean };
 }

@@ -19,6 +19,26 @@ function GameTimeline({ act }: { act: LessonData['activity'] }) {
   return <span className="small">{ev.map((e, i) => <span key={i}>{i ? ' → ' : ''}{e.t} <span className="muted">{fmtTime(e.at)}</span></span>)}</span>;
 }
 
+/* "What is the date?": fill the answer in on the board piece by piece (weekday → month → day → year), or all at once. */
+function DateSteps({ bs }: { bs: Partial<BoardState> }) {
+  const p = bs.dateParts, step = bs.dateStep ?? (bs.dateShown ? 4 : 0);
+  if (!p) return <div className="stack sm"><h3>What is the date?</h3><p className="small muted">Open the board to fill in the date.</p></div>;
+  const pieces: [string, string][] = [['Weekday', p.weekday], ['Month', p.month], ['Day', String(p.day)], ['Year', String(p.year)]];
+  const next = step < 4 ? pieces[step] : null;
+  return (
+    <div className="stack sm">
+      <div className="spread"><h3>What is the date?</h3><span className="pill">{step} of 4 filled in</span></div>
+      <p className="small muted">Ask the class one piece at a time. Each tap writes the next piece on the board.</p>
+      <div className="datesteps">{pieces.map(([k, v], i) => <button key={k} type="button" className={'dstep' + (i < step ? ' on' : i === step ? ' next' : '')} aria-pressed={i < step}
+        onClick={() => send('setDateStep', i < step && i === step - 1 ? i : i + 1)}><small>{i + 1} · {k}</small><b>{v}</b></button>)}</div>
+      <div className="row">
+        {next ? <button type="button" className="btn pri big grow" onClick={() => send('setDateStep', step + 1)}>Next: {next[0].toLowerCase()} · {next[1]} →</button> : <span className="datebig grow">{bs.date}</span>}
+        {step < 4 ? <button type="button" className="btn" onClick={() => send('setDateStep', 4)}>Fill in all</button> : null}
+        {step > 0 ? <button type="button" className="btn ghost" onClick={() => send('setDateStep', 0)}>Clear</button> : null}
+      </div>
+    </div>);
+}
+
 /* Right after STOP: mark which of the watched children stopped (same data as the Stop check tab). */
 function WhoStopped({ bs }: { bs: Partial<BoardState> }) {
   const d = St().get(), list = students(), stops = d.activity.stops, n = stops.length;
@@ -64,8 +84,7 @@ function Controls({ bs }: { bs: Partial<BoardState> }) {
             <button type="button" className={'fbtn' + (s.present === true ? ' on' : '')} aria-pressed={s.present === true} onClick={() => setPresent(s.id, true)}>Here</button>
             <button type="button" className={'fbtn' + (s.present === false ? ' on off' : '')} aria-pressed={s.present === false} onClick={() => setPresent(s.id, false)}>Not here</button></div></div>)}</div>
       </div> : null}
-      {show('date') ? <div className="stack sm"><h3>Calendar</h3><div className="row"><span className="datebig">{bs.date || 'Open the board to see its date'}</span>
-        <button type="button" className={'btn' + (bs.dateShown ? '' : ' pri')} onClick={() => send('showDate', bs.dateShown ? 0 : 1)}>{bs.dateShown ? 'Hide the date' : 'Fill in the date'}</button></div></div> : null}
+      {show('date') ? <DateSteps bs={bs} /> : null}
     </>;
   }
   if (box.id === 'ready') {

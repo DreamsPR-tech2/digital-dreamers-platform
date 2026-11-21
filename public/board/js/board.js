@@ -29,20 +29,21 @@
     day: today.getDate()
   };
   D.label = D.weekday+', '+D.long;
-  D.month = fmt('en-US', {month:'long'}); D.monthEs = fmt('es-PR', {month:'long'});
+  D.month = fmt('en-US', {month:'long'}); D.monthEs = fmt('es-PR', {month:'long'}); D.year = today.getFullYear();
 
   // ---------- state ----------
   function freshGame(){ return { phase:'intro', place:null, pending:null, signal:null, rot:0, spinning:false, round:[] }; }
-  function fresh(){ return { cur:1, notes:false, flow:true, word:0, letter:0, introPart:'all', dateShown:false, here:0, total:0, names:[], bb:null, game:freshGame(),
+  function fresh(){ return { cur:1, notes:false, flow:true, word:0, letter:0, introPart:'all', dateShown:false, dateStep:0, here:0, total:0, names:[], bb:null, game:freshGame(),
     level:null, levelLog:[], page:0, seq:{placed:[], checked:false, shuffle:[]} }; }
   var state = fresh();
   try{ var s = JSON.parse(localStorage.getItem(KEY)||'null'); if(s && typeof s.cur==='number'){ for(var k in state) if(s[k]!==undefined) state[k]=s[k]; } }catch(e){}
   (function(){ var g = freshGame(); for(var k in g) if(state.game[k]===undefined) state.game[k] = g[k]; })();
   if(state.cur>LAST+1) state.cur = 1;
+  if(state.dateStep===undefined) state.dateStep = state.dateShown ? 4 : 0;   // saved before piece-by-piece dates
   if(state.game.spinning){ state.game.spinning = false; state.game.place = state.game.pending; state.game.pending = null; }   // reloaded mid-spin
   var chan = null; try{ chan = new BroadcastChannel('wehelp-board'); }catch(e){}
   function snapshot(){ var g = state.game;
-    return {cur:state.cur, flow:state.flow!==false, word:state.word, letter:state.letter, open:typeof pres!=='undefined' && pres.mode!=='overview', date:D.label, dateShown:state.dateShown, introPart:state.introPart, names:(state.names||[]).slice(),
+    return {cur:state.cur, flow:state.flow!==false, word:state.word, letter:state.letter, open:typeof pres!=='undefined' && pres.mode!=='overview', date:D.label, dateShown:state.dateShown, dateStep:state.dateStep|0, dateParts:{weekday:D.weekday, month:D.month, day:D.day, year:D.year}, introPart:state.introPart, names:(state.names||[]).slice(),
       here:state.here, total:state.total, bb:state.bb, phase:g.phase, place:g.place, signal:g.signal, spinning:g.spinning, round:g.round,
       level:state.level, page:state.page, seq:{placed:state.seq.placed, checked:state.seq.checked}}; }
   function announce(){ var snap = snapshot(); if(chan) chan.postMessage({type:'state', state:snap}); try{ window.dispatchEvent(new CustomEvent('wehelp-board-state', {detail:snap})); }catch(e){} }
@@ -95,8 +96,8 @@
       return '<div class="intro" id="intro">'
         + '<section class="isec iatt"><h4 class="ititle">'+bi(C.attendance.en, C.attendance.es)+'</h4><ol class="alist" id="alist"></ol><div class="att" id="att"></div><div class="attn" id="attN"></div></section>'
         + '<section class="isec ical" id="iDate" data-act="date"><div class="qrow"><h4 class="ititle">'+bi('What is the date?', '¿Qué fecha es hoy?')+'</h4>'
-        +   '<div class="dval"><b><span class="f f1">'+esc(D.weekday)+',</span><span class="f f2">'+esc(D.long)+'</span></b>'
-        +   '<i class="f f3">'+esc(D.weekdayEs)+', '+esc(D.longEs)+'</i></div></div>' + monthGrid() + '</section>'
+        +   '<div class="dval"><b><span class="f f1" data-s="1">'+esc(D.weekday)+',</span><span class="f2"><span class="f" data-s="2">'+esc(D.month)+'</span> <span class="f" data-s="3">'+D.day+',</span> <span class="f" data-s="4">'+D.year+'</span></span></b>'
+        +   '<i><span class="f" data-s="1">'+esc(D.weekdayEs)+',</span> <span class="f" data-s="3">'+D.day+'</span> <span class="f" data-s="2">de '+esc(D.monthEs)+'</span> <span class="f" data-s="4">de '+D.year+'</span></i></div></div>' + monthGrid() + '</section>'
         + '</div>';
     },
     today: function(){
@@ -157,9 +158,17 @@
   var finale = $('#finale'), notes = $('#notes');
 
   // ---------- render ----------
+  // Date: filled in piece by piece (1 weekday · 2 month · 3 day · 4 year). Pieces that appear together come in one after another.
+  function renderDate(){
+    var st = state.dateStep|0, el = $('#iDate'), prev = +(el.dataset.step||0);
+    el.classList.toggle('wk-on', st>=1); el.classList.toggle('mo-on', st>=2); el.classList.toggle('day-on', st>=3); el.classList.toggle('shown', st>=4);
+    $$('.f[data-s]', el).forEach(function(f){ var k = +f.dataset.s, on = k<=st;
+      f.style.transitionDelay = on && !f.classList.contains('on') ? Math.max(0, k-prev-1)*0.35+'s' : '0s'; f.classList.toggle('on', on); });
+    el.dataset.step = st;
+  }
   var lastAtt = '', lastNames = [];
   function renderIntro(){
-    $('#iDate').classList.toggle('shown', !!state.dateShown);
+    renderDate();
     $('#intro').dataset.part = state.introPart || 'attend';
     var names = Array.isArray(state.names) ? state.names : [];
     var here = Math.max(0, state.here|0), total = Math.max(here, state.total|0), key = here+'/'+total+'|'+names.join('\u0001');
@@ -313,7 +322,9 @@
   var PARTS = ['attend', 'date', 'all'];
   function setIntroPart(p){ if(PARTS.indexOf(p)<0) return; state.introPart = p; renderIntro(); save(); }
   function stepIntroPart(d){ var i = PARTS.indexOf(state.introPart); setIntroPart(PARTS[(Math.max(0,i)+d+PARTS.length)%PARTS.length]); }
-  function showDate(on){ state.dateShown = on===undefined ? !state.dateShown : !!on; renderIntro(); save(); }
+  function setDateStep(n){ state.dateStep = Math.max(0, Math.min(4, n|0)); state.dateShown = state.dateStep===4; renderIntro(); save(); }
+  function nextDatePiece(){ setDateStep(state.dateStep>=4 ? 0 : (state.dateStep|0)+1); }   // D key and tapping the calendar
+  function showDate(on){ setDateStep((on===undefined ? state.dateStep!==4 : !!on) ? 4 : 0); }  // all at once (the pilot portal uses this)
   // Brain Break: the teacher picks one; null goes back to the four choices
   function setBrainBreak(id){ state.bb = C.brainBreaks.some(function(b){ return b.id===id; }) ? id : null; renderReady(); save(); }
   // Move together game: intro (the four places) → play (wheel left, current place right) → close (who helps here?)
@@ -384,7 +395,7 @@
     if(a){
       e.stopPropagation();
       var act = a.dataset.act;
-      if(act==='date'){ showDate(); return; }
+      if(act==='date'){ nextDatePiece(); return; }
       if(act==='bb'){ setBrainBreak(a.dataset.id); return; }
       if(act==='bbclear'){ setBrainBreak(null); return; }
       if(act==='spin'){ spin(); return; }
@@ -456,7 +467,7 @@
   function boxKey(e){
     var id = boxAt(state.cur).id, k = e.key, kl = k.toLowerCase(), num = (k>='1' && k<='9') ? +k : 0;
     if(id==='intro'){
-      if(kl==='d'){ showDate(); return true; }
+      if(kl==='d'){ nextDatePiece(); return true; }
       if(k==='ArrowRight'){ stepIntroPart(1); return true; } if(k==='ArrowLeft'){ stepIntroPart(-1); return true; } }
     if(id==='ready'){
       if(num && num<=C.brainBreaks.length){ setBrainBreak(C.brainBreaks[num-1].id); return true; } if(k==='0'){ setBrainBreak(null); return true; } }
@@ -514,7 +525,7 @@
 
   // ---------- control surface for the teacher portal ----------
   var API = { goto:jump, next:next, back:back, open:expand, close:function(){ collapse(false); },
-    setAttendance:setAttendance, showDate:showDate, setIntroPart:setIntroPart, setBrainBreak:setBrainBreak,
+    setAttendance:setAttendance, showDate:showDate, setDateStep:setDateStep, nextDatePiece:nextDatePiece, setIntroPart:setIntroPart, setBrainBreak:setBrainBreak,
     gamePhase:gamePhase, spin:spin, setPlace:setPlace, signal:signal,
     setWord:setWord, setLetter:setLetter, say:say, sayCurrent:sayCurrent, setFlow:setFlow,
     setLevel:setLevel, turn:turn, reset:reset, seqCheck:seqCheck, seqUndo:seqUndo, seqNew:seqNew,

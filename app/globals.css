@@ -185,6 +185,14 @@ textarea { font-family: ui-monospace, Menlo, monospace; font-size: 14px; }
 .levelpick .rec { box-shadow: inset 0 0 0 2px var(--teal); }
 .gamelog { font-size: .85em; background: var(--canvas); border-radius: 10px; padding: 10px 12px; }
 .datebig { font-weight: 800; color: var(--navy); font-size: 1.15em; }
+.datesteps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.dstep { text-align: left; padding: 9px 12px; border-radius: 12px; border: 2px dashed var(--line); background: #fff; min-height: 64px; display: flex; flex-direction: column; justify-content: center; }
+.dstep small { font-size: .72em; font-weight: 700; color: var(--ink-3); }
+.dstep b { font-size: 1.1em; color: var(--ink-3); }
+.dstep.next { border-style: solid; border-color: var(--blue); }
+.dstep.next b { color: var(--navy); }
+.dstep.on { border-style: solid; border-color: var(--gold-b); background: var(--gold-soft); }
+.dstep.on b { color: var(--navy); }
 details > summary { cursor: pointer; font-weight: 600; color: var(--navy); }
 
 /* class panel: everyone, live */
@@ -349,6 +357,7 @@ svg.chart text { font-family: Poppins, sans-serif; }
   .timeline { grid-template-columns: 1fr 1fr; }
   .srow { grid-template-columns: 1fr; }
   .attgrid, .bbpick { grid-template-columns: 1fr; }
+  .datesteps { grid-template-columns: 1fr 1fr; }
   .stats { grid-template-columns: 1fr 1fr; }
 }
 @media print {
