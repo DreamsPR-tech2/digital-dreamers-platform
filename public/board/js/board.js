@@ -6,7 +6,7 @@
  */
 (function(){
   var C = window.WEHELP, BOXES = C.boxes, LAST = BOXES.length, NP = C.places.length;
-  var KEY = 'wehelp-board:v2';
+  var KEY = 'dreams-platform:wehelp-board:v2';   // platform: own key and channel (see runtime/store.js)
   var $ = function(s, r){ return (r||document).querySelector(s); };
   var $$ = function(s, r){ return [].slice.call((r||document).querySelectorAll(s)); };
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
@@ -41,7 +41,7 @@
   if(state.cur>LAST+1) state.cur = 1;
   if(state.dateStep===undefined) state.dateStep = state.dateShown ? 4 : 0;   // saved before piece-by-piece dates
   if(state.game.spinning){ state.game.spinning = false; state.game.place = state.game.pending; state.game.pending = null; }   // reloaded mid-spin
-  var chan = null; try{ chan = new BroadcastChannel('wehelp-board'); }catch(e){}
+  var chan = null; try{ chan = new BroadcastChannel('dreams-platform-board'); }catch(e){}
   function snapshot(){ var g = state.game;
     return {cur:state.cur, flow:state.flow!==false, word:state.word, letter:state.letter, open:typeof pres!=='undefined' && pres.mode!=='overview', date:D.label, dateShown:state.dateShown, dateStep:state.dateStep|0, dateParts:{weekday:D.weekday, month:D.month, day:D.day, year:D.year}, introPart:state.introPart, names:(state.names||[]).slice(),
       here:state.here, total:state.total, bb:state.bb, phase:g.phase, place:g.place, signal:g.signal, spinning:g.spinning, round:g.round,

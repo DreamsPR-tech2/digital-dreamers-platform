@@ -40,7 +40,10 @@ boxes were reworked (see "Board changes" below). So:
   follow the pilot README's "Supabase setup" to connect, then Setup → Sync on each iPad;
 - the pilot portal at `../we-help-pilot` still works on the same data and stays the fallback for Dec 1.
 
-When the pilot changes one of these files, copy it over again (`cmp` should only differ on `DEMO_NAMES` in `store.js`).
+The platform's copies also use their own browser-storage keys (`dreams-platform:…`) and board channel
+(`dreams-platform-board`), so the platform and the pilot never share data when both are served from
+`dreamspr-tech2.github.io`. When the pilot changes one of these files, copy it over again and re-apply
+`DEMO_NAMES` and those keys.
 `public/board/js/board.js` and `public/board/css/board.css` now differ from the pilot on purpose; merge pilot changes by hand.
 
 ### Board changes (platform only)

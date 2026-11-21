@@ -15,7 +15,8 @@
 (function(){
   var CFG = window.WEHELP_CONFIG || {};
   var REMOTE = !!(CFG.supabaseUrl && CFG.supabaseAnonKey && window.supabase);
-  var KEY = REMOTE ? 'wehelp-cache:v1' : 'wehelp-data:v1', OUTBOX_KEY = 'wehelp-outbox:v1', ME_KEY = 'wehelp-me:v1';
+  // platform: own keys (dreams-platform:…) so it never shares browser data with the pilot on the same site
+  var KEY = REMOTE ? 'dreams-platform:wehelp-cache:v1' : 'dreams-platform:wehelp-data:v1', OUTBOX_KEY = 'dreams-platform:wehelp-outbox:v1', ME_KEY = 'dreams-platform:wehelp-me:v1';
   var SESSION_DATE = CFG.sessionDate || '2026-12-01';
 
   // Fictional demo roster. Real names are loaded before the day into the team's backend, never into this repo.
@@ -118,7 +119,7 @@
   // =====================================================================
   var Sync = (function(){
     if(!REMOTE) return null;
-    var sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'wehelp-auth' } });
+    var sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'dreams-platform:wehelp-auth' } });
     var outbox = []; try{ outbox = JSON.parse(localStorage.getItem(OUTBOX_KEY) || '[]'); }catch(e){}
     var st = { online: navigator.onLine, flushing: false, lastSync: null, error: null, user: null, member: null, loaded: false };
     var version = 0, retryT = null, refreshT = null, realtime = null;
@@ -321,7 +322,7 @@
   // =====================================================================
   // Board link (portal side)
   // =====================================================================
-  var chan = null; try{ chan = new BroadcastChannel('wehelp-board'); }catch(e){}
+  var chan = null; try{ chan = new BroadcastChannel('dreams-platform-board'); }catch(e){}
   var rt = null;
   var boardSubs = [], boardState = null, boardSeen = 0, lastJSON = '';
   function onBoardMsg(m){

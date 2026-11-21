@@ -6,7 +6,7 @@
 (function(){
   var CFG = window.WEHELP_CONFIG || {};
   if(!(CFG.supabaseUrl && CFG.supabaseAnonKey && window.supabase && window.board)) return;
-  var sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'wehelp-board-auth' } });
+  var sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'dreams-platform:wehelp-board-auth' } });
   var ch = null, last = null, dot = null;
 
   function status(on, text){

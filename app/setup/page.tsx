@@ -9,21 +9,21 @@ export default function Page() { const rt = useRuntime(); return <Shell tab="set
 
 function Connection() {
   const router = useRouter(), st = St().status(), cfg = window.WEHELP_CONFIG || { supabaseUrl: '', sessionDate: '' };
-  let fixed = false; try { fixed = !localStorage.getItem('wehelp-connect:v1') && !!cfg.supabaseUrl; } catch { /* ignore */ }
+  let fixed = false; try { fixed = !localStorage.getItem('dreams-platform:wehelp-connect:v1') && !!cfg.supabaseUrl; } catch { /* ignore */ }
   const [url, setUrl] = useState(''), [key, setKey] = useState('');
   if (St().mode === 'synced') return (
     <div className="card pad stack sm"><h3>Sync</h3>
       <p className="small">Connected to <b>{cfg.supabaseUrl}</b> · lesson date {cfg.sessionDate}.<br />{st.pending ? `${st.pending} change(s) waiting to send. ` : 'Everything is sent. '}{st.lastSync ? `Last synced ${new Date(st.lastSync).toLocaleTimeString()}.` : ''}</p>
       <div className="row"><button type="button" className="btn" onClick={() => St().signOut().then(ok => { if (ok !== false) router.push('/signin/'); })}>Sign out</button>
         {fixed ? null : <button type="button" className="btn ghost" onClick={() => { if (!confirm('Disconnect this device from Supabase? It goes back to keeping data on this device only.')) return;
-          St().signOut().then(ok => { if (ok === false) return; try { localStorage.removeItem('wehelp-connect:v1'); } catch { /* ignore */ } location.reload(); }); }}>Disconnect this device</button>}</div></div>);
+          St().signOut().then(ok => { if (ok === false) return; try { localStorage.removeItem('dreams-platform:wehelp-connect:v1'); } catch { /* ignore */ } location.reload(); }); }}>Disconnect this device</button>}</div></div>);
   return (
     <div className="card pad stack sm"><h3>Sync</h3>
       <p className="small muted">This device keeps data to itself. To share data across all iPads and the board, connect it to the team’s Supabase project (Project Settings → API). It uses the same project and tables as the We Help! pilot.</p>
       <div className="g2"><label className="f">Project URL<input type="text" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://xxxx.supabase.co" autoComplete="off" /></label>
         <label className="f">Anon public key<input type="text" value={key} onChange={e => setKey(e.target.value)} autoComplete="off" /></label></div>
       <div className="row"><button type="button" className="btn pri" onClick={() => { const u = url.trim(), k = key.trim(); if (!/^https?:\/\//.test(u) || k.length < 20) { toast('Add the project URL and anon key'); return; }
-        try { localStorage.setItem('wehelp-connect:v1', JSON.stringify({ url: u, key: k })); } catch { /* ignore */ } location.reload(); }}>Connect this device</button></div></div>);
+        try { localStorage.setItem('dreams-platform:wehelp-connect:v1', JSON.stringify({ url: u, key: k })); } catch { /* ignore */ } location.reload(); }}>Connect this device</button></div></div>);
 }
 
 function Setup() {

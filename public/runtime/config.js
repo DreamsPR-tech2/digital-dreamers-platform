@@ -10,6 +10,6 @@ window.WEHELP_CONFIG = {
   sessionDate: '2026-12-01'
 };
 (function(){ // per-device connection saved from Portal → Setup (used only when the values above are empty)
-  try{ var o = JSON.parse(localStorage.getItem('wehelp-connect:v1') || 'null');
+  try{ var o = JSON.parse(localStorage.getItem('dreams-platform:wehelp-connect:v1') || 'null');
     if(o && !window.WEHELP_CONFIG.supabaseUrl){ window.WEHELP_CONFIG.supabaseUrl = o.url; window.WEHELP_CONFIG.supabaseAnonKey = o.key; } }catch(e){}
 })();

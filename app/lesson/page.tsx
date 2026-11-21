@@ -210,7 +210,7 @@ function LessonBody() {
         <div><div className="tiny muted" style={{ fontWeight: 700, letterSpacing: '.08em' }}>{c.unit.eyebrow.toUpperCase()} · {d.session.date}</div>
           <h1 style={{ fontSize: '1.6em' }}>{c.unit.title} <span className="muted" style={{ fontSize: '.6em', fontWeight: 600 }}>· {c.unit.titleEs}</span></h1></div>
         <div className="row"><span className={'conn' + (conn ? ' on' : '')}><i />{conn ? 'Board connected' : 'Board not open'}</span>
-          <a className="btn navy" href={boardUrl()} target="wehelp-board"><Ico n="board" s={17} c="#fff" /> Open board</a></div>
+          <a className="btn navy" href={boardUrl()} target="dreams-platform-board"><Ico n="board" s={17} c="#fff" /> Open board</a></div>
       </div>
       {conn ? null : <p className="note">Open the board on the classroom TV computer. {St().mode === 'synced' ? 'Sign it in with the board account; it then follows this iPad from any device.' : 'In this-device mode it must be another tab of this same browser.'}</p>}
       <div className="boxes">{c.boxes.map((b: { id: string; n: number; title: string; color: string }) => {
