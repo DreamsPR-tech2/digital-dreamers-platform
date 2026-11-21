@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import Shell from '@/components/Shell';
+import Shell, { canControlBoard } from '@/components/Shell';
 import { C, St, students, summary, useRuntime, type Student } from '@/lib/runtime';
 import { childByName, PAST_LESSONS } from '@/lib/children';
 import { groupOf, readiness, type Group, BOX_OBS } from '@/lib/big5';
@@ -44,8 +44,10 @@ function Today() {
           <h1>Good morning{me?.name ? `, ${me.name}` : ''} <Ico n="sparkle" s={22} c="#FFC20E" fill /></h1>
           <p>Today is Unit 3 · We Help! Run the board from the iPad, record each child as you go, and tomorrow’s plan builds itself.</p></div>
         <div className="row" style={{ justifyContent: 'flex-end' }}>
-          <Link href="/lesson/" className="btn red big"><Ico n="play" s={16} c="#fff" fill /> {started ? 'Continue the lesson' : 'Start the lesson'}</Link>
-          <Link href="/assess/" className="btn white big"><Ico n="check" s={18} /> Assess</Link></div>
+          {canControlBoard() ? <><Link href="/lesson/" className="btn red big"><Ico n="play" s={16} c="#fff" fill /> {started ? 'Continue the lesson' : 'Start the lesson'}</Link>
+          <Link href="/assess/" className="btn white big"><Ico n="check" s={18} /> Assess</Link></>
+          : <><Link href="/assess/" className="btn red big"><Ico n="check" s={18} c="#fff" /> Go to Assess</Link>
+          <Link href="/lesson/" className="btn white big"><Ico n="play" s={16} fill /> Watch the lesson</Link></>}</div>
         <div className="deco"><span className="shapes lg"><i className="sq" /><i className="ci" /><i className="tr" /></span></div>
       </div>
 

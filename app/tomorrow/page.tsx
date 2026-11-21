@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import Shell from '@/components/Shell';
+import Shell, { leadOnly } from '@/components/Shell';
 import { C, St, students, summary, useRuntime } from '@/lib/runtime';
 import { generatePlan, type Plan } from '@/lib/plan';
 import { GROUP_LABEL, type Group } from '@/lib/big5';
@@ -39,6 +39,7 @@ function Tomorrow() {
   const nchg = Object.values(P.boxes).flat().filter(l => l.kind !== 'same').length;
   const B = P.board, bbName = c.brainBreaks.find((b: { id: string }) => b.id === B.bb)?.en;
   const applyBoard = () => {
+    if (!leadOnly()) return;
     if (!confirm(`Set up the board for ${P.label}? It goes back to box 1 with today’s game, sequencing and attendance cleared, then applies the presets below.`)) return;
     const s = St().board; s.send('reset'); if (B.level) s.send('setLevel', B.level, 'tomorrow plan'); s.send('setBrainBreak', B.bb || '');
     s.send('setWord', B.word); s.send('setLetter', B.letter); s.send('goto', 1); toast('Board set up for tomorrow');

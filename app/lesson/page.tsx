@@ -1,14 +1,24 @@
 'use client';
 /* Lesson (lesson lead): drives the classroom board. Every control from the pilot portal's Lesson tab, unchanged in
  * behaviour (same board commands, same logs), with the live class panel next to it. */
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import Shell from '@/components/Shell';
+import Shell, { canControlBoard, leadOnly, NOT_LEAD } from '@/components/Shell';
 import ClassPulse from '@/components/ClassPulse';
 import { boardImg, boardUrl, C, meName, setField, St, students, summary, useRuntime, type BoardState, type LessonData } from '@/lib/runtime';
 import { fillAll, sampleReady } from '@/lib/sample';
 import { Avatar, fmtTime, Ico, toast } from '@/components/ui';
 
-const send = (cmd: string, ...a: unknown[]) => { St().board.send(cmd, ...a); };
+// Board commands: lesson lead only (Assess sees the screen and gets a message instead).
+const send = (cmd: string, ...a: unknown[]) => { if (leadOnly()) St().board.send(cmd, ...a); };
+// Taps on board controls are stopped before they change anything, for everyone but the lesson lead.
+// Recording children (marked data-any: who stopped, sample data) stays open to Assess.
+function guardBoard(e: React.MouseEvent) {
+  if (canControlBoard()) return;
+  const t = (e.target as HTMLElement).closest('button, a.btn, input, select');
+  if (!t || t.closest('[data-any]')) return;
+  e.preventDefault(); e.stopPropagation(); toast(NOT_LEAD);
+}
 const bi = (en: string, es: string) => <span className="bi"><b>{en}</b><i>{es}</i></span>;
 const placeById = (id: string) => C().places.find((p: { id: string }) => p.id === id);
 const bbName = (id: string) => C().brainBreaks.find((b: { id: string }) => b.id === id)?.en || id;
@@ -60,7 +70,7 @@ function WhoStopped({ bs }: { bs: Partial<BoardState> }) {
   const last = n ? stops[n - 1] : null, place = last ? placeById(last.place) : null, live = bs.signal === 'stop';
   const picker = <div className="chips">{list.map(s => <button key={s.id} type="button" className={'chip' + (d.stop.watched.includes(s.id) ? ' on' : '')} onClick={() => toggleWatch(s.id)}>{s.name}{s.present === false ? ' · not here' : ''}</button>)}</div>;
   return (
-    <div className={'whostop' + (live ? ' live' : '')}>
+    <div className={'whostop' + (live ? ' live' : '')} data-any>
       <div className="spread"><h3>{last ? `Stop ${n}${place ? ' · ' + place.landmark : ''}: who stopped?` : 'Who stopped?'}</h3>{live ? <span className="pill no">STOP is on the board</span> : null}</div>
       {!watched.length ? <><p className="small muted">Pick 4–5 children to watch. After each STOP, mark whether each one froze within about 3 seconds, in their own way.</p>{picker}</>
         : !last ? <p className="small muted">Press STOP to start the first stop. Watching: {watched.map(s => s.name).join(', ')}.</p>
@@ -198,9 +208,10 @@ function LessonBody() {
   const list = students(), here = list.filter(s => s.present === true).length, d = St().get();
   // the board writes on the first names of the children marked here, in the order they were marked, plus the count
   const names = list.filter(s => s.present === true).sort((a, b) => (a.present_at || '').localeCompare(b.present_at || '') || a.no - b.no).map(s => s.name);
+  const lead = canControlBoard();
   useEffect(() => {
     const shown = bs.names || [];
-    if (conn && box?.id === 'intro' && (bs.here !== here || bs.total !== list.length || shown.join('|') !== names.join('|'))) send('setAttendance', here, list.length, names);
+    if (lead && conn && box?.id === 'intro' && (bs.here !== here || bs.total !== list.length || shown.join('|') !== names.join('|'))) send('setAttendance', here, list.length, names);
   });
   const note: [string, string] | undefined = box && c.notes[box.id];
   const color = (b: { color: string }) => `var(--${b.color})`;
@@ -212,7 +223,9 @@ function LessonBody() {
         <div className="row"><span className={'conn' + (conn ? ' on' : '')}><i />{conn ? 'Board connected' : 'Board not open'}</span>
           <a className="btn navy" href={boardUrl()} target="dreams-platform-board"><Ico n="board" s={17} c="#fff" /> Open board</a></div>
       </div>
+      {lead ? null : <p className="note viewonly"><b>You’re signed in as Assess.</b> You can see everything the lesson lead does here, but only the lesson lead controls the board. Record children in <Link href="/assess/">Assess</Link>.</p>}
       {conn ? null : <p className="note">Open the board on the classroom TV computer. {St().mode === 'synced' ? 'Sign it in with the board account; it then follows this iPad from any device.' : 'In this-device mode it must be another tab of this same browser.'}</p>}
+      <div className="stack" style={{ gap: 14 }} onClickCapture={guardBoard}>
       <div className="boxes">{c.boxes.map((b: { id: string; n: number; title: string; color: string }) => {
         const n = list.filter(s => s.obs?.[b.id]).length, p = list.length ? Math.round((n / list.filter(s => s.present !== false).length || 0) * 100) : 0;
         return <button key={b.id} type="button" className={'bx' + (b.n === cur ? ' on' : b.n < cur ? ' done' : '')} style={{ ['--bc' as string]: color(b) }} onClick={() => send('goto', b.n)}>
@@ -222,11 +235,12 @@ function LessonBody() {
         <button type="button" className={'btn' + (bs.open ? '' : ' pri')} onClick={() => send(bs.open ? 'close' : 'open')}>{bs.open ? 'Close box' : 'Open box full size'}</button>
         <button type="button" className="btn warn" onClick={() => send('next')}>Done, next →</button>
         <button type="button" className="btn ghost" onClick={() => send('setFlow', bs.flow === false ? 1 : 0)}>Lesson flow on board: {bs.flow === false ? 'Off' : 'On'}</button>
-        {d.demo && sampleReady(d) ? <button type="button" className="btn ghost sm" style={{ marginLeft: 'auto' }} onClick={() => { St().update(x => fillAll(x, St().now())); toast('Sample lesson filled for the 8 demo children'); }}>Fill the whole sample lesson</button> : null}
+        {d.demo && sampleReady(d) ? <button type="button" data-any className="btn ghost sm" style={{ marginLeft: 'auto' }} onClick={() => { St().update(x => fillAll(x, St().now())); toast('Sample lesson filled for the 8 demo children'); }}>Fill the whole sample lesson</button> : null}
+      </div>
       </div>
       <div className="lessonlay">
         <div className="stack">
-          <div className="card pad stack ctlcard" style={{ ['--bc' as string]: box ? color(box) : 'var(--blue)' }}>
+          <div className="card pad stack ctlcard" style={{ ['--bc' as string]: box ? color(box) : 'var(--blue)' }} onClickCapture={guardBoard}>
             <div className="ctlhead"><span className="n">{cur}</span><div className="grow"><h2>{box?.title}</h2><span className="muted small">{box?.es}{bs.open ? ' · open full size' : ''}</span></div></div>
             <Controls bs={bs} />
           </div>

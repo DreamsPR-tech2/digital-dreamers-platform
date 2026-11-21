@@ -80,6 +80,12 @@ per-child fields (no database change needed):
 
 Tomorrow's saved plan is kept on the iPad that saved it (`localStorage`, `dreams-plan:v1:<date>`).
 
+## Roles
+Two roles, chosen at sign-in (in synced mode they come from the Supabase team list):
+- **Lesson lead** (`lead`): controls the board from the Lesson screen and Tomorrow’s “Set up the board”.
+- **Assess** (`screener`; any other team role counts as Assess): sees everything and records children (Assess tab,
+  the class panel, who stopped). Tapping a board control shows a message instead of changing the board.
+
 ## Rules
 - **Naming:** "Big 5" always means Head Start's five domains. The five lesson words (help, do, see, go, stop) are
   **Power Words**. The pilot files call them "Big 5 words"; the platform rewrites that wording when it displays it.

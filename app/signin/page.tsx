@@ -2,7 +2,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
 import { St, useRuntime, type Me } from '@/lib/runtime';
-import { homeOf, ROLES } from '@/components/Shell';
+import { homeOf, ROLES, roleLabel } from '@/components/Shell';
 import { Shapes, Toaster, toast, Wordmark } from '@/components/ui';
 
 const STEPS = [
@@ -25,7 +25,7 @@ export default function SignIn() {
       <h2>Who is using this iPad?</h2>
       <p className="muted small">Your name is saved with every score and note you record.</p>
       <label className="f">Your name<input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Cari" autoComplete="off" /></label>
-      <div className="f">Your role in the lesson</div>
+      <div className="f">What are you doing in the lesson?</div>
       <div className="rolegrid">
         {ROLES.map(r => <button type="button" key={r.id} className={'role' + (role === r.id ? ' on' : '')} onClick={() => setRole(r.id)} aria-pressed={role === r.id}><b>{r.label}</b><small>{r.d}</small></button>)}
       </div>
@@ -54,7 +54,7 @@ export default function SignIn() {
     <div className="card pad stack">
       <h2>{member ? `Signed in as ${member.name}` : 'Not on the team list'}</h2>
       <p className="muted small">{member?.role === 'board' ? 'This is the board account. Use it on the classroom TV only. Sign in here with your own account.'
-        : member ? `Role: ${ROLES.find(r => r.id === member.role)?.label || member.role}. Your name and role come from the team list in Supabase.` : 'This account can sign in but isn’t on the team list yet. Ask Madeline to add it.'}</p>
+        : member ? `Role: ${roleLabel(member.role)}. Your name and role come from the team list in Supabase.` : 'This account can sign in but isn’t on the team list yet. Ask Madeline to add it.'}</p>
       <div className="row">
         {member && member.role !== 'board' ? <button className="btn pri" type="button" onClick={() => router.push(homeOf(st.me()))}>Continue</button> : null}
         <button className="btn" type="button" onClick={() => st.signOut().then(() => router.refresh())}>Sign out</button>

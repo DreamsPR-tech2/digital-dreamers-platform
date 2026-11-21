@@ -3,15 +3,24 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { St, summary, useRuntime, type Me } from '@/lib/runtime';
-import { Ico, Shapes, Toaster, Wordmark } from './ui';
+import { Ico, Shapes, toast, Toaster, Wordmark } from './ui';
 
+/* Two roles. The lesson lead controls the board. Assess (the assistant) sees everything and records children,
+ * but can't control the board. Synced accounts with any other team role (teacher, tech) count as Assess. */
 export const ROLES: { id: Me['role']; label: string; home: string; d: string }[] = [
-  { id: 'lead', label: 'Lesson lead', home: '/lesson/', d: 'Drives the board · attendance, Brain Break, game, reader' },
-  { id: 'screener', label: 'Assistant · Assess', home: '/assess/', d: 'By part scoring, primary screen, stop check and second screen' },
-  { id: 'teacher', label: 'Classroom teacher', home: '/assess/stop/', d: 'Stop check during the game · class overview' },
-  { id: 'tech', label: 'Tech support', home: '/results/', d: 'Results, sync and setup' },
+  { id: 'lead', label: 'Lesson lead', home: '/lesson/', d: 'Controls the board: attendance, date, Brain Break, the game, words, letters, reader, sequencing' },
+  { id: 'screener', label: 'Assess', home: '/assess/', d: 'Sees everything; records by part, primary screen, stop check and second screen. Can’t control the board' },
 ];
-export const homeOf = (m: Me | null) => ROLES.find(r => r.id === m?.role)?.home || '/today/';
+export const roleLabel = (role?: string | null) => (role === 'lead' ? 'Lesson lead' : 'Assess');
+export const homeOf = (m: Me | null) => (m?.role === 'lead' ? '/lesson/' : '/assess/');
+/** True for the lesson lead (in synced mode, from the team list). */
+export function canControlBoard() {
+  const st = St(), m = st.mode === 'synced' ? st.member?.() : st.me();
+  return m?.role === 'lead';
+}
+export const NOT_LEAD = 'Only the lesson lead can control the board. You can see everything here, and record children in Assess.';
+/** Use before any board command: shows the message and returns false for anyone but the lesson lead. */
+export function leadOnly() { if (canControlBoard()) return true; toast(NOT_LEAD); return false; }
 
 type Tab = 'today' | 'lesson' | 'assess' | 'results' | 'tomorrow' | 'class' | 'big5' | 'setup' | 'signin';
 const NAV: (readonly [Tab, string] | 'sep')[] = [
@@ -67,7 +76,7 @@ export default function Shell({ tab, children, gate = true }: { tab: Tab; childr
           </nav>
           <div className="hright">
             {ok ? <SyncPill /> : null}
-            <Link href="/signin/" className="me">{me ? <>{me.name} <small>· {ROLES.find(r => r.id === me.role)?.label || me.role}</small></> : 'Sign in'}</Link>
+            <Link href="/signin/" className="me">{me ? <>{me.name} <small>· {roleLabel(me.role)}</small></> : 'Sign in'}</Link>
             <Link href="/setup/" className={'icnbtn' + (tab === 'setup' ? ' on' : '')} aria-label="Setup"><Ico n="gear" s={20} /></Link>
           </div>
         </div>
