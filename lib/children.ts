@@ -62,7 +62,7 @@ export const CHILDREN: Child[] = [
     supports: ['Movement break before seated work', 'Short directions, one step at a time', 'Seat near the board'],
     b5Sept: sept('oeoe eoen oeee eeen oeee'), lessons: [55, 58, 62, 64],
     months: { bk: [60, 64, 68], ol: [50, 56, 60], pa: [46, 52, 58], ak: [44, 50, 54], cp: [44, 48, 52] },
-    family: 'Play “Go, Move, Stop” at home: Mason calls the STOP.' },
+    family: 'Play “Go and Stop” at home: Mason calls the STOP.' },
   { id: 'luna', name: 'Luna', age: 5, home: 'es', color: '#4b3f9e',
     tag: 'Down syndrome', mode: 'Words + signs', modes: ['speech', 'sign'], strengths: 'Joyful participant; signs HELP and STOP reliably.',
     supports: ['Extra wait time (10 s)', 'Large visuals and tactile cards', 'Seated option named aloud'],

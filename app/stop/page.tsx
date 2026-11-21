@@ -12,6 +12,16 @@ export default function Page() { const rt = useRuntime(); return <Shell tab="sto
 function Stop() {
   const rt = useRuntime(), d = St().get(), list = students(), w = d.stop.watched, turn = d.stop.turn, turns = d.stop.turns, stops = d.activity.stops;
   const watched = list.filter(s => w.includes(s.id));
+  // The number of stops follows the game (one per STOP the lesson lead calls); the teacher can add or remove stops.
+  const [manual, setManual] = useState(false);
+  const anyMarks = list.some(s => (s.stop || []).some(Boolean));
+  const started = stops.length > 0 || anyMarks || manual;
+  const removeLast = () => {
+    const marked = list.some(s => (s.stop || [])[turns - 1]);
+    if (marked && !confirm(`Remove stop ${turns}? Its Yes/No marks are cleared.`)) return;
+    St().update(x => { x.stop.turns = Math.max(1, x.stop.turns - 1); x.stop.turn = Math.min(x.stop.turn, x.stop.turns);
+      x.students.forEach(s => { if ((s.stop || []).length > x.stop.turns) s.stop = (s.stop || []).slice(0, x.stop.turns); }); });
+  };
   // a STOP just called on the board → banner for 8 seconds
   const lastCall = useRef(0), was = useRef(false), [, tick] = useState(0);
   const sig = rt.board?.signal;
@@ -31,11 +41,14 @@ function Stop() {
       <details className="card pad" open={!watched.length}><summary><b>Children to watch</b> <span className="muted small">({watched.length} chosen · 4–5 is enough)</span></summary>
         <div className="chips" style={{ marginTop: 10 }}>{list.map(s => <button key={s.id} type="button" className={'chip' + (w.includes(s.id) ? ' on' : '')}
           onClick={() => St().update(x => { const i = x.stop.watched.indexOf(s.id); if (i >= 0) x.stop.watched.splice(i, 1); else x.stop.watched.push(s.id); })}>{s.name}{s.present === false ? ' · not here' : ''}</button>)}</div></details>
-      {watched.length ? <>
+      {watched.length && !started ? <div className="card pad stack sm"><b>No stops yet.</b><p className="small muted">Each time the lesson lead presses STOP in the game, a stop is added here (and on the Lesson screen), so you mark as many stops as the class plays.</p>
+        <div className="row"><button type="button" className="btn" onClick={() => { St().update(x => { x.stop.turns = 1; x.stop.turn = 1; }); setManual(true); }}>Mark without the game: start stop 1</button></div></div> : null}
+      {watched.length && started ? <>
         <div className="turnbar"><button type="button" className="btn" onClick={() => St().update(x => { x.stop.turn = Math.max(1, x.stop.turn - 1); })}>←</button>
           <span className="t">Stop {turn} of {turns}{atP ? ' · ' + atP.landmark : ''}</span>
           <button type="button" className="btn" onClick={() => St().update(x => { x.stop.turn = Math.min(x.stop.turns, x.stop.turn + 1); })}>Next stop →</button>
-          {turn === turns ? <button type="button" className="btn ghost" onClick={() => St().update(x => { x.stop.turns++; x.stop.turn = x.stop.turns; })}>+ Add a stop</button> : null}</div>
+          <button type="button" className="btn ghost" onClick={() => St().update(x => { x.stop.turns = Math.min(20, x.stop.turns + 1); x.stop.turn = x.stop.turns; })}>+ Add a stop</button>
+          {turns > 1 ? <button type="button" className="btn ghost" onClick={removeLast}>Remove stop {turns}</button> : null}</div>
         <div className="stopgrid">{watched.map(s => { const st = s.stop || [], v = st[turn - 1];
           return <div key={s.id} className="srow">
             <span className="row" style={{ gap: 8 }}><Avatar name={s.name} /><span className="nm">{s.name}</span></span>

@@ -5,7 +5,6 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Shell from '@/components/Shell';
-import CardMat from '@/components/CardMat';
 import { given, meName, result, setField, St, students, summary, useRuntime, type ScreenItem, type Student } from '@/lib/runtime';
 import { flagText } from '@/lib/runtime';
 import { INDICATOR, STATUS_ICON, todayEvidence, domainOf } from '@/lib/big5';
@@ -15,7 +14,9 @@ import { Avatar, fmtSecs, LevelPill, toast } from '@/components/ui';
 const ZERO_REASONS = ['Distracted', 'Did not want to take part', 'Did not seem to understand', 'Upset or tired'];
 const STEP_WRAP = 6, STEP_SUM = 7;
 const ITEMS = () => window.WEHELP_ITEMS;
-const a1FromMissed = (m: string[]) => { const c = 5 - m.length; return c === 5 ? 3 : c >= 3 ? 2 : c >= 1 ? 1 : 0; };
+// Item 1: the screener taps the Power Words the child gets; the score follows (5 → 3 · 3–4 → 2 · 1–2 → 1).
+// Stored as a1_missed, the pilot's field, so data and CSV stay the same.
+const a1FromGot = (n: number) => (n === 5 ? 3 : n >= 3 ? 2 : n >= 1 ? 1 : 0);
 const firstOpenStep = (s: Student) => { for (let i = 0; i < 5; i++) if (!given(s[ITEMS()[i].key])) return i; return 5; };
 
 export default function Page() { return <Shell tab="screen"><Suspense fallback={null}><Screen /></Suspense></Shell>; }
@@ -57,7 +58,6 @@ function Roster() {
 
 function OneStudent({ id, step: step0, re }: { id: string; step: number | null; re: boolean }) {
   const router = useRouter();
-  const [mat, setMat] = useState<string[] | null>(null);
   const s0 = St().student(id);
   useEffect(() => { // start the clock the first time this student is opened (same as the pilot)
     if (!s0) return;
@@ -74,7 +74,7 @@ function OneStudent({ id, step: step0, re }: { id: string; step: number | null; 
 
   const score = (it: ScreenItem, v: number) => {
     const k = re ? 'r' + it.n : it.key;
-    setField(id, x => { x[k] = v; if (v !== 0 && x.zero_notes) delete x.zero_notes[k]; if (re) x['r' + it.n + '_at'] = St().now(); });
+    setField(id, x => { x[k] = v; if (!re && it.n === 1 && v === 0) x.a1_missed = window.WeHelpScoring.BIG5.slice(); if (v !== 0 && x.zero_notes) delete x.zero_notes[k]; if (re) x['r' + it.n + '_at'] = St().now(); });
     if (v !== 0 && it.n !== 1) setTimeout(() => { const u = new URL(location.href); if (u.searchParams.get('id') === id && +(u.searchParams.get('step') || 0) === step) next(); }, 380);
   };
 
@@ -83,7 +83,7 @@ function OneStudent({ id, step: step0, re }: { id: string; step: number | null; 
   if (!re) dots.push(<button key="w" type="button" className={step === STEP_WRAP ? 'cur' : given(s.response_mode) && given(s.engaged) ? 'done' : ''} onClick={() => go(STEP_WRAP)} aria-label="Mode and engagement">✎</button>);
 
   let body;
-  if (step < items.length) body = <ItemView s={s} it={items[step]} re={re} onScore={score} onNext={next} onPrev={() => step > 0 && go(step - 1)} onMat={setMat}
+  if (step < items.length) body = <ItemView s={s} it={items[step]} re={re} onScore={score} onNext={next} onPrev={() => step > 0 && go(step - 1)}
     onSkip={() => { setField(id, x => { x.bonus = null; }); go(STEP_WRAP); }} />;
   else if (!re && step === STEP_WRAP) body = <WrapView s={s} onPrev={() => go(step - 1)} onSave={() => {
     const miss = window.WeHelpScoring.missingItems(St().toRec(s)); if (miss.length) { toast('Score item ' + miss.join(', ') + ' first'); return; }
@@ -97,7 +97,6 @@ function OneStudent({ id, step: step0, re }: { id: string; step: number | null; 
         {re ? <span className="pill re">Second screen</span> : null}<Clock s={s} re={re} /></div>
       <div className="steps">{dots}</div>
       <div className="card pad">{body}</div>
-      {mat ? <CardMat keys={mat} onClose={() => setMat(null)} /> : null}
     </div>);
 }
 
@@ -115,9 +114,10 @@ function Wait5() {
   return <button type="button" className={'btn wait5 ' + st} onClick={() => { setSt(''); requestAnimationFrame(() => setSt('run')); clearTimeout(t.current); t.current = setTimeout(() => setSt('end'), 5000); }}><i />⏱ Wait 5 s</button>;
 }
 
-function ItemView({ s, it, re, onScore, onNext, onPrev, onMat, onSkip }: { s: Student; it: ScreenItem; re: boolean; onScore: (it: ScreenItem, v: number) => void; onNext: () => void; onPrev: () => void; onMat: (k: string[]) => void; onSkip: () => void }) {
+function ItemView({ s, it, re, onScore, onNext, onPrev, onSkip }: { s: Student; it: ScreenItem; re: boolean; onScore: (it: ScreenItem, v: number) => void; onNext: () => void; onPrev: () => void; onSkip: () => void }) {
   const k = re ? 'r' + it.n : it.key, v = s[k] as number | null | undefined;
-  const miss = (re ? (s.r1_missed as string[] | undefined) : s.a1_missed) || [];
+  const ALL = window.WeHelpScoring.BIG5, miss = s.a1_missed || [];
+  const got = given(s.a1) ? ALL.filter(w => !miss.includes(w)) : [];
   const note = (s.zero_notes || {})[k] || '';
   const b5 = it.n === 'bonus' ? 'ol2' : ({ 1: 'ol3', 2: 'ol2', 3: 'ol1', 4: 'pa3', 5: 'ol2' } as Record<number, string>)[it.n as number];
   return (
@@ -125,12 +125,14 @@ function ItemView({ s, it, re, onScore, onNext, onPrev, onMat, onSkip }: { s: St
       <div className="area">{it.n === 'bonus' ? 'Bonus' : 'Item ' + it.n} · {it.area}{it.draft ? <span className="draft">draft wording</span> : null}{re ? <span className="pill" style={{ marginLeft: 8 }}>started at {String(s[it.key])}</span> : null}</div>
       <div className="show"><b>Show:</b> {it.show.replace(/Big 5 cards/g, 'Power Word cards')}</div>
       <div className="say">{it.say}</div>
-      <div className="row"><Wait5 /><button type="button" className="btn" onClick={() => onMat(it.mat)}>▣ Card mat</button>
+      <div className="row"><Wait5 />
         {b5 ? <span className="tiny muted" style={{ marginLeft: 'auto' }}><span className="sw" style={{ background: domainOf(b5).color }} /> Big 5 evidence: {INDICATOR[b5].text}</span> : null}</div>
-      {it.n === 1 && !re ? <div className="missed"><b>Tap the Power Words missed</b>
-        <div className="chips">{window.WeHelpScoring.BIG5.map(w => <button key={w} type="button" className={'chip miss' + (miss.includes(w) ? ' on' : '')} onClick={() =>
-          setField(s.id, x => { const m = (x.a1_missed || []).slice(), i = m.indexOf(w); if (i >= 0) m.splice(i, 1); else m.push(w); x.a1_missed = window.WeHelpScoring.BIG5.filter(y => m.includes(y)); x.a1 = a1FromMissed(x.a1_missed); })}>{w}</button>)}</div>
-        <span className="muted small">{5 - miss.length} of 5 correct. The score below follows; tap 0 for no response.</span></div> : null}
+      {it.n === 1 && !re ? <div className="missed"><b>Tap the Power Words they get</b>
+        <div className="chips">{ALL.map(w => <button key={w} type="button" className={'chip got' + (got.includes(w) ? ' on' : '')} aria-pressed={got.includes(w)} onClick={() =>
+          setField(s.id, x => { const g = new Set(given(x.a1) ? ALL.filter(y => !(x.a1_missed || []).includes(y)) : []); if (g.has(w)) g.delete(w); else g.add(w);
+            if (!g.size) { x.a1 = null; x.a1_missed = []; return; } // nothing tapped: back to not scored (tap 0 for no response)
+            x.a1_missed = ALL.filter(y => !g.has(y)); x.a1 = a1FromGot(g.size); })}>{w}</button>)}</div>
+        <span className="muted small">{got.length} of 5 correct. The score below follows; tap 0 for no response.</span></div> : null}
       <div className="scores">{it.rubric.map((txt, i) => <button key={i} type="button" className={'sc' + (v === i ? ' on' : '')} data-s={i} onClick={() => onScore(it, i)}><b>{i}</b><span>{txt}</span></button>)}</div>
       {v === 0 ? <div className="zero"><b>If 0, why?</b>
         <div className="chips">{ZERO_REASONS.map(z => <button key={z} type="button" className={'chip' + (note === z ? ' on' : '')} onClick={() => setField(s.id, x => { x.zero_notes = { ...(x.zero_notes || {}), [k]: z }; })}>{z}</button>)}</div>

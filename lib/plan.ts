@@ -87,8 +87,8 @@ export function generatePlan(inp: PlanInput): Plan {
   if (sm.stop_percent !== null && sm.stop_percent < 50) {
     add('move', 'Play the stop-and-go part again before adding a new skill', 'chg', `Stop check: ${sm.stop_yes} Yes of ${sm.stop_yes + sm.stop_no} (${sm.stop_percent}%)`);
   } else if (sm.stop_percent !== null) {
-    add('move', 'Keep the routine: GO · MOVE · STOP at all four places', 'same', `Stop check ${sm.stop_percent}% Yes`);
-  } else add('move', 'Let’s Explore Puerto Rico: GO · MOVE · STOP at all four places');
+    add('move', 'Keep the routine: GO and STOP at all four places', 'same', `Stop check ${sm.stop_percent}% Yes`);
+  } else add('move', 'Let’s Explore Puerto Rico: GO and STOP at all four places');
   const stopNo = students.filter(s => (s.stop || []).filter(v => v === 'N').length > (s.stop || []).filter(v => v === 'Y').length);
   if (stopNo.length) { add('move', `Model STOP with ${names(stopNo)} next to the leader`, 'chg', `${stopNo.length} had more No than Yes`); stopNo.forEach(s => P.kid[s.id].push('Stands next to the leader for STOP')); }
   if (helperK.length) { add('move', `Helper picture cards in hand for “Who helps here?” · ${names(helperK)}`, 'chg', `${helperK.length} needed support to name the helper`); }

@@ -2,7 +2,7 @@
 /* Bridge between React and the We Help! runtime that the pilot already runs in class.
  *
  * public/runtime/*.js are the pilot's own files (store.js: local / Supabase sync with offline queue + board link;
- * scoring.js: Quick Check rules; screen-items.js: rubric and card mat). They load as plain scripts before React
+ * scoring.js: Quick Check rules; screen-items.js: item wording and rubric). They load as plain scripts before React
  * starts (see app/layout.tsx), so the platform reads and writes exactly the same data the pilot portal does.
  * This file only adds types and a provider that re-renders the app when the data or the board changes.
  */
@@ -44,7 +44,7 @@ export interface LessonData {
 }
 export interface BoardState {
   cur: number; flow: boolean; word: number; letter: number; open: boolean; date: string; dateShown: boolean; introPart: string;
-  here: number; total: number; bb: string | null; phase: string; place: number | null; signal: string | null; spinning: boolean;
+  here: number; total: number; names?: string[]; bb: string | null; phase: string; place: number | null; signal: string | null; spinning: boolean;
   round: number[]; level: number | null; page: number; seq: { placed: number[]; checked: boolean };
 }
 export interface Me { name: string; role: 'lead' | 'screener' | 'teacher' | 'tech' | 'board' }

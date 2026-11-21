@@ -4,9 +4,9 @@
 import { useEffect } from 'react';
 import Shell from '@/components/Shell';
 import ClassPulse from '@/components/ClassPulse';
-import { boardImg, boardUrl, C, meName, St, students, summary, useRuntime, type BoardState, type LessonData } from '@/lib/runtime';
+import { boardImg, boardUrl, C, meName, setField, St, students, summary, useRuntime, type BoardState, type LessonData } from '@/lib/runtime';
 import { fillAll, sampleReady } from '@/lib/sample';
-import { fmtTime, Ico, toast } from '@/components/ui';
+import { Avatar, fmtTime, Ico, toast } from '@/components/ui';
 
 const send = (cmd: string, ...a: unknown[]) => { St().board.send(cmd, ...a); };
 const bi = (en: string, es: string) => <span className="bi"><b>{en}</b><i>{es}</i></span>;
@@ -17,6 +17,27 @@ function GameTimeline({ act }: { act: LessonData['activity'] }) {
   const ev = [...act.draws.map(x => ({ at: x.at, t: '📍 ' + (placeById(x.place)?.landmark || x.place) })), ...act.stops.map(x => ({ at: x.at, t: '✋ Stop ' + x.n }))]
     .sort((a, b) => (a.at < b.at ? -1 : 1));
   return <span className="small">{ev.map((e, i) => <span key={i}>{i ? ' → ' : ''}{e.t} <span className="muted">{fmtTime(e.at)}</span></span>)}</span>;
+}
+
+/* Right after STOP: mark which of the watched children stopped (same data as the Stop check tab). */
+function WhoStopped({ bs }: { bs: Partial<BoardState> }) {
+  const d = St().get(), list = students(), stops = d.activity.stops, n = stops.length;
+  const watched = list.filter(s => d.stop.watched.includes(s.id));
+  const toggleWatch = (id: string) => St().update(x => { const i = x.stop.watched.indexOf(id); if (i >= 0) x.stop.watched.splice(i, 1); else x.stop.watched.push(id); });
+  const mark = (id: string, v: 'Y' | 'N') => setField(id, x => { const st = (x.stop || []).slice(); while (st.length < n) st.push(null); st[n - 1] = st[n - 1] === v ? null : v; x.stop = st; });
+  const last = n ? stops[n - 1] : null, place = last ? placeById(last.place) : null, live = bs.signal === 'stop';
+  const picker = <div className="chips">{list.map(s => <button key={s.id} type="button" className={'chip' + (d.stop.watched.includes(s.id) ? ' on' : '')} onClick={() => toggleWatch(s.id)}>{s.name}{s.present === false ? ' · not here' : ''}</button>)}</div>;
+  return (
+    <div className={'whostop' + (live ? ' live' : '')}>
+      <div className="spread"><h3>{last ? `Stop ${n}${place ? ' · ' + place.landmark : ''}: who stopped?` : 'Who stopped?'}</h3>{live ? <span className="pill no">STOP is on the board</span> : null}</div>
+      {!watched.length ? <><p className="small muted">Pick 4–5 children to watch. After each STOP, mark whether each one froze within about 3 seconds, in their own way.</p>{picker}</>
+        : !last ? <p className="small muted">Press STOP to start the first stop. Watching: {watched.map(s => s.name).join(', ')}.</p>
+        : <div className="stack sm">{watched.map(s => { const v = (s.stop || [])[n - 1];
+            return <div key={s.id} className="row" style={{ flexWrap: 'nowrap' }}><Avatar name={s.name} /><b className="grow" style={{ color: 'var(--navy)' }}>{s.name}</b>
+              <span className="yn"><button type="button" className={'btn y' + (v === 'Y' ? ' on' : '')} onClick={() => mark(s.id, 'Y')}>Stopped</button><button type="button" className={'btn n' + (v === 'N' ? ' on' : '')} onClick={() => mark(s.id, 'N')}>Kept going</button></span></div>; })}
+            <p className="tiny muted">A blank is not a No: leave it if you could not see. These marks are the same ones on the Stop check tab.</p></div>}
+      {watched.length ? <details><summary className="small">Change who you are watching ({watched.length})</summary><div style={{ marginTop: 8 }}>{picker}</div></details> : null}
+    </div>);
 }
 
 function Controls({ bs }: { bs: Partial<BoardState> }) {
@@ -36,7 +57,7 @@ function Controls({ bs }: { bs: Partial<BoardState> }) {
         {bs.open ? null : <p className="small muted">Tap “Open box full size” so the chosen part fills the board.</p>}</div>
       {show('attend') ? <div className="stack sm">
         <div className="spread"><h3>Who is here?</h3><span className="pill">{here} here · {marked} of {list.length} marked</span></div>
-        <p className="small muted">Ask “Who is here?” and tap each child. The board shows only the count, never names.</p>
+        <p className="small muted">Ask “Who is here?” and tap each child. Their first name is written onto the board’s list as you tap.</p>
         <div className="row"><button type="button" className="btn ghost sm" onClick={() => St().update(x => x.students.forEach(s => { if (s.present !== true) { s.present = true; s.present_at = St().now(); } }))}>Mark everyone here</button></div>
         <div className="attgrid">{list.map(s => <div key={s.id} className={'frow' + (s.present === true ? ' done' : s.present === false ? ' away' : '')}>
           <span className="nm">{s.name}</span><div className="row" style={{ gap: 6 }}>
@@ -75,22 +96,22 @@ function Controls({ bs }: { bs: Partial<BoardState> }) {
     const showPlace = (i: number) => { St().update(x => { x.activity.draws.push({ place: c.places[i].id, at: St().now(), by: meName(), how: 'card' }); }); send('setPlace', i); };
     const signal = (sig: string) => {
       if (sig === 'stop' && bs.place != null && bs.signal !== 'stop') St().update(x => { const n = x.activity.stops.length + 1;
-        x.activity.stops.push({ n, place: c.places[bs.place!].id, at: St().now(), by: meName() }); x.stop.turns = Math.max(x.stop.turns, n); x.stop.turn = n; });
+        x.activity.stops.push({ n, place: c.places[bs.place!].id, at: St().now(), by: meName() }); x.stop.turns = n === 1 ? 1 : Math.max(x.stop.turns, n); x.stop.turn = n; });
       send('signal', sig);
     };
     const say = pl ? (act.draws.length > 1 ? pl.goEn.replace(/^Go/, 'Next, go') : pl.goEn.replace(/^Go/, 'First, go')) : '';
     return <>
-      <h3>{c.game.title} · Go, Move and Stop</h3>
+      <h3>{c.game.title} · Go and Stop</h3>
       <div className="seg" role="group" aria-label="Game part">{[['intro', '1 · Show the places'], ['play', '2 · Play'], ['close', '3 · Who helps here?']].map(([k, l]) =>
         <button key={k} type="button" className={'btn' + (phase === k ? ' on' : '')} onClick={() => send('gamePhase', k)}>{l}</button>)}</div>
       <button type="button" className="btn pri big" disabled={spinning} onClick={spin}>{spinning ? 'Spinning…' : 'Spin the wheel'}</button>
       <div className="nowcard">{spinning ? <span className="muted">The wheel is spinning…</span> : pl ? <><b>{pl.landmark}</b> · {pl.en}<br />
-        <span className="small">Say: “{say}” · Move: {pl.move} {pl.how} · Helper: {pl.helper}</span></> : <span className="muted">Spin to pick the first place.</span>}</div>
+        <span className="small">Say: “{say}” · While going: {pl.move} {pl.how} · Helper: {pl.helper}</span></> : <span className="muted">Spin to pick the first place.</span>}</div>
       <div className="row">
         <button type="button" className="btn cue go" disabled={!pl} onClick={() => signal('go')}>GO</button>
-        <button type="button" className="btn cue mv" disabled={!pl} onClick={() => signal('move')}>MOVE</button>
         <button type="button" className="btn cue st" disabled={!pl} onClick={() => signal('stop')}>STOP</button></div>
-      <p className="small muted">STOP opens the next stop on the classroom teacher’s Stop check, labelled with this place.</p>
+      <p className="small muted">GO: everyone moves. STOP: everyone freezes. GO again to keep playing. Each STOP adds a stop to the stop check.</p>
+      <WhoStopped bs={bs} />
       <details><summary className="small">Show a place without spinning (a student drew a paper card)</summary>
         <div className="chips" style={{ marginTop: 8 }}>{c.places.map((p: { landmark: string }, i: number) => <button key={i} type="button" className={'chip' + (bs.place === i ? ' on' : '')} onClick={() => showPlace(i)}>{p.landmark}</button>)}</div></details>
       {act.draws.length || act.stops.length ? <div className="gamelog"><b>Today so far</b> · {act.draws.length} place{act.draws.length === 1 ? '' : 's'}, {act.stops.length} stop{act.stops.length === 1 ? '' : 's'}<br /><GameTimeline act={act} /></div> : null}
@@ -144,8 +165,12 @@ export default function Lesson() {
 function LessonBody() {
   const rt = useRuntime(), c = C(), bs: Partial<BoardState> = rt.board || {}, conn = rt.connected, cur = bs.cur || 1, box = c.boxes[cur - 1];
   const list = students(), here = list.filter(s => s.present === true).length, d = St().get();
-  // the board shows the attendance count only (same rule as the pilot)
-  useEffect(() => { if (conn && box?.id === 'intro' && (bs.here !== here || bs.total !== list.length)) send('setAttendance', here, list.length); });
+  // the board writes on the first names of the children marked here, in the order they were marked, plus the count
+  const names = list.filter(s => s.present === true).sort((a, b) => (a.present_at || '').localeCompare(b.present_at || '') || a.no - b.no).map(s => s.name);
+  useEffect(() => {
+    const shown = bs.names || [];
+    if (conn && box?.id === 'intro' && (bs.here !== here || bs.total !== list.length || shown.join('|') !== names.join('|'))) send('setAttendance', here, list.length, names);
+  });
   const note: [string, string] | undefined = box && c.notes[box.id];
   const color = (b: { color: string }) => `var(--${b.color})`;
   return (

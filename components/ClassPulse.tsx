@@ -29,9 +29,13 @@ export default function ClassPulse({ box, title = 'Class · live' }: { box: stri
         <div className="spread"><h3>{title}</h3>{item ? <span className="pill blue">{rec} of {here.length} recorded</span> : null}</div>
         {item ? <p className="small"><b>This box:</b> {item.label}{item.b5 ? <> · <span className="sw" style={{ background: domainOf(item.b5).color }} /> {DOMAIN[domainOf(item.b5).id].name}</> : <span className="muted"> · regulation (outside the Big 5)</span>}</p>
           : <p className="small muted">Move the board to a box to record it here.</p>}
-        <div className="legend">{OBS.map(([k, ic, l]) => <span key={k}><b>{ic}</b>{l}</span>)}</div>
       </div>
       <div>
+        <div className="prow phead" aria-hidden="true">
+          <span />
+          <span>Child · boxes 1–8 · Quick Check</span>
+          {item ? <div className="obsbtns">{OBS.map(([k, ic, l]) => <span key={k} className={'obh ' + k}><b>{ic}</b>{l}</span>)}</div> : <span />}
+        </div>
         {list.map(s => {
           const cur = box ? s.obs?.[box] : undefined, st = (s.stop || []).filter(Boolean);
           return (

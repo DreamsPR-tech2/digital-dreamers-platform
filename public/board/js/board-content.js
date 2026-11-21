@@ -54,7 +54,7 @@ window.WEHELP = {
   ],
   brainBreakGuide: 'img/bb-guide.jpg',
 
-  // Box 4. "Let's Explore Puerto Rico: Go, Move and Stop" (Dec 1 game guide v4). Spin, go to the sign, do the move, freeze on STOP.
+  // Box 4. "Let's Explore Puerto Rico" (Dec 1 game guide v4, platform version: GO and STOP only). Spin, GO to the sign doing its action, freeze on STOP.
   // img: null until the place art arrives. Spanish wording needs a check by the team.
   game: {
     title: 'Let’s Explore Puerto Rico', titleEs: '¡Exploremos Puerto Rico!',
@@ -86,10 +86,9 @@ window.WEHELP = {
       move: 'Pick up and carry.', moveEs: 'Levanta y carga.',
       how: 'Reach down, then lift up. Seated: lean forward.', howEs: 'Baja las manos y levanta. Sentado: inclínate hacia adelante.' }
   ],
-  // The three game cues, in order
+  // The game cues, in order: GO starts the moving, STOP freezes, GO starts again
   cues: [
     { id: 'go',   en: 'GO',   es: '¡Ve!' },
-    { id: 'move', en: 'MOVE', es: '¡Muévete!' },
     { id: 'stop', en: 'STOP', es: '¡Para!' }
   ],
 
@@ -134,7 +133,7 @@ window.WEHELP = {
     intro: ['Today · 0–4 min · Lizbeth', 'Ask “Who is here?” and mark each student on the iPad as they answer (the board shows only the count, never names). Then the calendar: “What day is today?” Fill in the date from the iPad and read it together: “Today is Tuesday.” Every response mode counts: speech, pointing, gesture, sign, AAC or Spanish. Talk to students as teenagers.'],
     today: ['Plan · 4–5 min · Lizbeth', 'Point to each part of the plan as you name it. Cari starts pulling students for the quick check.'],
     ready: ['Brain Break · 5–7 min · Lizbeth', 'Pick the break that fits the class right now (the iPad shows when each one helps). Show, say one short direction at a time, wait at least 5 seconds. Seated and standing are equal. Never require eye contact or full range of motion. Stop for pain, dizziness, shortness of breath or loss of balance.'],
-    move:  ['Move together · 7–22 min · Lizbeth', 'Show the four places first. Then start the game: spin, “First, go to ___.” Do the move together, seated or standing. Hold up STOP: everyone freezes for 3 seconds. The classroom teacher marks each stop on the iPad. A new student spins each time. Close: point to each sign, “Who helps here?”, then “We did it! We help!”'],
+    move:  ['Move together · 7–22 min · Lizbeth', 'Show the four places first. Then start the game: spin, “First, go to ___.” GO: everyone goes and does the place’s action, seated or standing. STOP: everyone freezes for 3 seconds. GO again to keep playing. Right after each STOP, mark who stopped on the iPad. A new student spins each time. Close: point to each sign, “Who helps here?”, then “We did it! We help!”'],
     wall:  ['Word wall · Kristen', 'Go through the five words one at a time (↑/↓ or the iPad). Show the picture, press the speaker so everyone hears the English word, then the class says it. Whole-class responses.'],
     pep:   ['Letters · Kristen', 'Go through H, D, S, G one at a time (↑/↓ or the iPad). Show the letter and picture, press the speaker to hear the letter and its word, then the class says it. Whole-class responses.'],
     read:  ['Read together · Kristen & Cari', 'Shared and echo reading at the class level from the quick check. Level 1: single words. Level 2: short sentences. Level 3: story.'],

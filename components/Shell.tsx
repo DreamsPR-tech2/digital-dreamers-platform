@@ -74,7 +74,7 @@ export default function Shell({ tab, children, gate = true }: { tab: Tab; childr
         {demo ? <div className="demobar">Demo roster · all 8 children and their data are fictional. Load the real roster in Setup before class.</div> : null}
       </header>
       <main className="main">{body}</main>
-      <footer className="foot noprint">DREAMS Inclusive Early Learning Framework™ · All Access Academics, LLC · Students never see names or scores on the board.</footer>
+      <footer className="foot noprint">DREAMS Inclusive Early Learning Framework™ · All Access Academics, LLC · The board never shows scores; only first names at “Who is here?”.</footer>
       <Toaster />
     </>
   );

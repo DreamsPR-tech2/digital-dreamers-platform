@@ -33,7 +33,7 @@
 
   // ---------- state ----------
   function freshGame(){ return { phase:'intro', place:null, pending:null, signal:null, rot:0, spinning:false, round:[] }; }
-  function fresh(){ return { cur:1, notes:false, flow:true, word:0, letter:0, introPart:'attend', dateShown:false, here:0, total:0, bb:null, game:freshGame(),
+  function fresh(){ return { cur:1, notes:false, flow:true, word:0, letter:0, introPart:'all', dateShown:false, here:0, total:0, names:[], bb:null, game:freshGame(),
     level:null, levelLog:[], page:0, seq:{placed:[], checked:false, shuffle:[]} }; }
   var state = fresh();
   try{ var s = JSON.parse(localStorage.getItem(KEY)||'null'); if(s && typeof s.cur==='number'){ for(var k in state) if(s[k]!==undefined) state[k]=s[k]; } }catch(e){}
@@ -42,7 +42,7 @@
   if(state.game.spinning){ state.game.spinning = false; state.game.place = state.game.pending; state.game.pending = null; }   // reloaded mid-spin
   var chan = null; try{ chan = new BroadcastChannel('wehelp-board'); }catch(e){}
   function snapshot(){ var g = state.game;
-    return {cur:state.cur, flow:state.flow!==false, word:state.word, letter:state.letter, open:typeof pres!=='undefined' && pres.mode!=='overview', date:D.label, dateShown:state.dateShown, introPart:state.introPart,
+    return {cur:state.cur, flow:state.flow!==false, word:state.word, letter:state.letter, open:typeof pres!=='undefined' && pres.mode!=='overview', date:D.label, dateShown:state.dateShown, introPart:state.introPart, names:(state.names||[]).slice(),
       here:state.here, total:state.total, bb:state.bb, phase:g.phase, place:g.place, signal:g.signal, spinning:g.spinning, round:g.round,
       level:state.level, page:state.page, seq:{placed:state.seq.placed, checked:state.seq.checked}}; }
   function announce(){ var snap = snapshot(); if(chan) chan.postMessage({type:'state', state:snap}); try{ window.dispatchEvent(new CustomEvent('wehelp-board-state', {detail:snap})); }catch(e){} }
@@ -53,12 +53,12 @@
   var SPEAKER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18.3 6.5a7.5 7.5 0 0 1 0 11"/></svg>';
   var PERSON = '<svg viewBox="0 0 24 32" aria-hidden="true"><circle cx="12" cy="7.5" r="6"/><path d="M1.5 31.5c0-7.5 4.7-12.5 10.5-12.5s10.5 5 10.5 12.5z"/></svg>';
   var ICON = {
-    breath:'<svg viewBox="0 0 24 24" fill="none" stroke="#3FA35B" stroke-width="2" stroke-linecap="round"><path d="M3 9h11a3 3 0 1 0-3-3"/><path d="M3 14h15a3 3 0 1 1-3 3"/><path d="M3 19h6"/></svg>',
-    move:'<svg viewBox="0 0 24 24" fill="none" stroke="#3FA35B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="2"/><path d="M4 17l4-1 2-3 3 2v6M10 13l1-5 4 2 3 3M8 9l3-1"/></svg>',
-    words:'<svg viewBox="0 0 24 24" fill="none" stroke="#3FA35B" stroke-width="2" stroke-linejoin="round"><rect x="2.5" y="3.5" width="8" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="8" height="7" rx="1.5"/><rect x="2.5" y="13.5" width="8" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="8" height="7" rx="1.5"/></svg>',
-    letters:'<svg viewBox="0 0 24 24" fill="none" stroke="#3FA35B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l4-12 4 12M4.5 15h5"/><path d="M14 7h4a3 3 0 0 1 0 6h-4zM14 13h5a3 3 0 0 1 0 6h-5z"/></svg>',
-    book:'<svg viewBox="0 0 24 24" fill="none" stroke="#3FA35B" stroke-width="2" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-9-2v14c4 0 7 .5 9 2 2-1.5 5-2 9-2V4c-4 0-7 .5-9 2z"/><path d="M12 6v14"/></svg>',
-    order:'<svg viewBox="0 0 24 24" fill="none" stroke="#3FA35B" stroke-width="2" stroke-linejoin="round"><rect x="2" y="7" width="5.5" height="10" rx="1.5"/><rect x="9.25" y="7" width="5.5" height="10" rx="1.5"/><rect x="16.5" y="7" width="5.5" height="10" rx="1.5"/></svg>'
+    breath:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9h11a3 3 0 1 0-3-3"/><path d="M3 14h15a3 3 0 1 1-3 3"/><path d="M3 19h6"/></svg>',
+    move:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="2"/><path d="M4 17l4-1 2-3 3 2v6M10 13l1-5 4 2 3 3M8 9l3-1"/></svg>',
+    words:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="2.5" y="3.5" width="8" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="8" height="7" rx="1.5"/><rect x="2.5" y="13.5" width="8" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="8" height="7" rx="1.5"/></svg>',
+    letters:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19l4-12 4 12M4.5 15h5"/><path d="M14 7h4a3 3 0 0 1 0 6h-4zM14 13h5a3 3 0 0 1 0 6h-5z"/></svg>',
+    book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-9-2v14c4 0 7 .5 9 2 2-1.5 5-2 9-2V4c-4 0-7 .5-9 2z"/><path d="M12 6v14"/></svg>',
+    order:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="2" y="7" width="5.5" height="10" rx="1.5"/><rect x="9.25" y="7" width="5.5" height="10" rx="1.5"/><rect x="16.5" y="7" width="5.5" height="10" rx="1.5"/></svg>'
   };
   // media: real image when `img` is set, else a labelled placeholder tile
   function media(img, label, color){
@@ -73,7 +73,7 @@
     var y = today.getFullYear(), m = today.getMonth(), first = new Date(y, m, 1).getDay(), days = new Date(y, m+1, 0).getDate();
     var cells = '', n = 0, i;
     for(i=0;i<first;i++,n++) cells += '<span class="d pad"></span>';
-    for(i=1;i<=days;i++,n++) cells += '<span class="d'+(i===D.day?' today':'')+'">'+i+'</span>';
+    for(i=1;i<=days;i++,n++) cells += '<span class="d'+(i===D.day?' is-today':'')+'">'+i+'</span>'; // not "today": that class is the Plan box
     for(;n%7;n++) cells += '<span class="d pad"></span>';
     return '<div class="mgrid'+(n>35?' rows6':'')+'"><div class="mhead">'+bi(D.month+' '+y, D.monthEs+' '+y)+'</div>'
       + '<div class="wk">'+C.weekdays.map(function(w, k){ return '<span'+(k===today.getDay()?' class="tdw"':'')+'>'+bi(w.en, w.es)+'</span>'; }).join('')+'</div>'
@@ -93,15 +93,15 @@
     // the part chosen on the iPad (attend, date) fills the box, or 'all' shows both.
     intro: function(){
       return '<div class="intro" id="intro">'
-        + '<section class="isec iatt"><h4 class="ititle">'+bi(C.attendance.en, C.attendance.es)+'</h4><div class="att" id="att"></div><div class="attn" id="attN"></div></section>'
-        + '<section class="isec ical" id="iDate" data-act="date"><h4 class="ititle">'+bi('Calendar', 'Calendario')+'</h4>' + monthGrid()
-        +   '<div class="dline"><span class="k">'+bi('Today is', 'Hoy es')+'</span><div class="dval"><b><span class="f f1">'+esc(D.weekday)+',</span> <span class="f f2">'+esc(D.long)+'</span></b>'
-        +   '<i class="f f3">'+esc(D.weekdayEs)+', '+esc(D.longEs)+'</i></div></div></section>'
+        + '<section class="isec iatt"><h4 class="ititle">'+bi(C.attendance.en, C.attendance.es)+'</h4><ol class="alist" id="alist"></ol><div class="att" id="att"></div><div class="attn" id="attN"></div></section>'
+        + '<section class="isec ical" id="iDate" data-act="date"><div class="qrow"><h4 class="ititle">'+bi('What is the date?', '¿Qué fecha es hoy?')+'</h4>'
+        +   '<div class="dval"><b><span class="f f1">'+esc(D.weekday)+',</span><span class="f f2">'+esc(D.long)+'</span></b>'
+        +   '<i class="f f3">'+esc(D.weekdayEs)+', '+esc(D.longEs)+'</i></div></div>' + monthGrid() + '</section>'
         + '</div>';
     },
     today: function(){
       return '<div class="today"><div class="td-plan">'
-        + C.plan.map(function(p){ var b = boxById(p.box); return '<div class="prow" data-box="'+p.box+'"><span class="pn">'+b.n+'</span>'+ICON[p.icon]+bi(b.title, b.es)+'</div>'; }).join('')
+        + C.plan.map(function(p){ var b = boxById(p.box); return '<div class="prow" data-box="'+p.box+'" style="--pc:var(--'+b.color+');--pcl:var(--'+b.color+'l)"><span class="pn">'+b.n+'</span>'+ICON[p.icon]+bi(b.title, b.es)+'</div>'; }).join('')
         + '</div></div>';
     },
     ready: function(){
@@ -157,13 +157,24 @@
   var finale = $('#finale'), notes = $('#notes');
 
   // ---------- render ----------
-  var lastAtt = '';
+  var lastAtt = '', lastNames = [];
   function renderIntro(){
     $('#iDate').classList.toggle('shown', !!state.dateShown);
     $('#intro').dataset.part = state.introPart || 'attend';
-    var here = Math.max(0, state.here|0), total = Math.max(here, state.total|0), key = here+'/'+total;
+    var names = Array.isArray(state.names) ? state.names : [];
+    var here = Math.max(0, state.here|0), total = Math.max(here, state.total|0), key = here+'/'+total+'|'+names.join('\u0001');
     if(key===lastAtt) return;
     var grew = lastAtt && here > +lastAtt.split('/')[0];
+    // Names (sent by the iPad as each child is marked here) are written onto the list; with no names, person icons.
+    $('#intro').classList.toggle('named', names.length > 0);
+    var list = $('#alist'), rows = names.length > 8 ? Math.ceil(names.length/2) : Math.max(names.length, 8);
+    list.style.gridTemplateRows = 'repeat('+rows+', minmax(0, 1fr))';
+    list.classList.toggle('two', names.length > 8);
+    list.innerHTML = names.map(function(n){
+      var isNew = lastAtt !== '' && lastNames.indexOf(n) < 0, long = n.length > 11;
+      return '<li'+(isNew?' class="draw"':'')+'><svg viewBox="0 0 300 46" preserveAspectRatio="xMinYMid meet" aria-label="'+esc(n)+'"><text x="4" y="35"'+(long?' textLength="290" lengthAdjust="spacingAndGlyphs"':'')+'>'+esc(n)+'</text></svg></li>';
+    }).join('');
+    lastNames = names.slice();
     var icons = ''; for(var i=0;i<Math.min(total, 30);i++) icons += '<span class="p'+(i<here?' in':'')+(grew && i===here-1?' pop':'')+'">'+PERSON+'</span>';
     $('#att').innerHTML = icons;
     $('#attN').innerHTML = '<span class="big'+(grew?' pop':'')+'">'+here+'</span>'+bi(here===1?'student is here':'students are here', here===1?'estudiante está aquí':'estudiantes están aquí');
@@ -294,8 +305,11 @@
   function back(){ if(state.cur>1){ state.cur = Math.min(state.cur-1, LAST); render(); } }
   function jump(n){ if(n>=1 && n<=LAST){ state.cur = n; render(); } }
   function reset(){ if(pres.mode!=='overview') return; clearTimeout(spinT); state = fresh(); render(); }
-  // Today: attendance count from the iPad (the board never sees who is here), the date, and which part fills the open box
-  function setAttendance(here, total){ state.here = Math.max(0, +here||0); state.total = Math.max(state.here, +total||0); renderIntro(); save(); }
+  // Today: attendance from the iPad (count, plus the first names of the children marked here, in the order they were
+  // marked; the platform sends names, the pilot portal sends only the count), the date, and which part fills the open box
+  function setAttendance(here, total, names){ state.here = Math.max(0, +here||0); state.total = Math.max(state.here, +total||0);
+    if(Array.isArray(names)) state.names = names.filter(function(n){ return typeof n==='string' && n.trim(); }).slice(0, 40).map(function(n){ return n.trim().slice(0, 24); });
+    renderIntro(); save(); }
   var PARTS = ['attend', 'date', 'all'];
   function setIntroPart(p){ if(PARTS.indexOf(p)<0) return; state.introPart = p; renderIntro(); save(); }
   function stepIntroPart(d){ var i = PARTS.indexOf(state.introPart); setIntroPart(PARTS[(Math.max(0,i)+d+PARTS.length)%PARTS.length]); }
@@ -327,7 +341,7 @@
     g.phase = 'play'; turnTo(i, 0); g.place = i; g.signal = 'go';
     if(g.round.indexOf(i)<0) g.round.push(i); if(g.round.length>=NP) g.round = [];
     renderMove(); save(); }
-  function signal(s){ var g = state.game; if(g.spinning || g.place==null) return; g.signal = ['go','move','stop'].indexOf(s)>=0 ? s : null; renderMove(); save(); }
+  function signal(s){ var g = state.game; if(g.spinning || g.place==null) return; g.signal = ['go','stop'].indexOf(s)>=0 ? s : null; renderMove(); save(); }
   // Word wall / Letters: one item at a time
   function setWord(i){ state.word = clampI(i, C.words.length); renderWall(); save(); }
   function setLetter(i){ state.letter = clampI(i, C.letters.length); renderLetters(); save(); }
@@ -400,6 +414,7 @@
   }
   function expand(){
     if(pres.mode!=='overview' || state.cur>LAST) return;
+    if(BOXES[state.cur-1].id==='intro' && state.introPart!=='all'){ state.introPart = 'all'; renderIntro(); save(); } // open with who is here + calendar
     var el = panels[state.cur-1], body = el.querySelector('.body');
     var r = {l:el.offsetLeft, t:el.offsetTop, w:el.offsetWidth, h:el.offsetHeight};
     el._bw0 = body.offsetWidth; el._bh0 = body.offsetHeight;
@@ -448,7 +463,7 @@
     if(id==='move'){
       if(num && num<=NP){ setPlace(num-1); return true; }
       if(kl==='w' || k===' '){ spin(); return true; }
-      if(kl==='g'){ signal('go'); return true; } if(kl==='m'){ signal('move'); return true; } if(kl==='s'){ signal('stop'); return true; }
+      if(kl==='g'){ signal('go'); return true; } if(kl==='s'){ signal('stop'); return true; }
       if(kl==='i'){ gamePhase('intro'); return true; } if(kl==='p'){ gamePhase('play'); return true; } if(kl==='c'){ gamePhase('close'); return true; }
     }
     if(id==='wall' || id==='pep'){
