@@ -241,7 +241,7 @@
     var i = clampI(state.letter, C.letters.length), l = C.letters[i];
     $$('#ltrs .wl-list li').forEach(function(li){ var k = +li.dataset.i; li.classList.toggle('on', k===i); li.classList.toggle('seen', k<i); });
     if(lastLtr===i) return; lastLtr = i;
-    $('#ltrCard').innerHTML = '<div class="wc" style="--lc:'+l.color+'"><b class="L">'+l.L+'<span>'+l.L.toLowerCase()+'</span></b>'+media(l.img, l.word, l.color)+speakBtn(l.L)+'</div>';   // no word on the card; Listen says the letter only
+    $('#ltrCard').innerHTML = '<div class="wc" style="--lc:'+l.color+'"><b class="L">'+l.L+'<span>'+l.L.toLowerCase()+'</span></b>'+media(l.img, l.word, l.color)+speakBtn(l.L+'. '+l.word)+'</div>';   // no word on the card; Listen still says "H. help"
   }
   function clampI(i, n){ i = +i||0; return Math.max(0, Math.min(n-1, i)); }
   function reader(){ return C.readers[state.level||1]; }
@@ -411,7 +411,7 @@
     }catch(e){} }
   try{ if(window.speechSynthesis){ speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = function(){ speechSynthesis.getVoices(); }; } }catch(e){}   // Chrome loads voices late
   function sayCurrent(){ var b = boxAt(state.cur), id = b && b.id;
-    if(id==='pep'){ var l = C.letters[clampI(state.letter, C.letters.length)]; say(l.L); }
+    if(id==='pep'){ var l = C.letters[clampI(state.letter, C.letters.length)]; say(l.L+'. '+l.word); }
     else { say(C.words[clampI(state.word, C.words.length)].en); } }
   // Lesson flow sidebar on/off (off = the boxes use the full width while presenting)
   function setFlow(on){ state.flow = on===undefined ? state.flow===false : !!on; renderFlow(); save(); }
