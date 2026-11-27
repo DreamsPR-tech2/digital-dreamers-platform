@@ -18,7 +18,7 @@ const CONTENT = {
   sequenceCount: { 1: 2, 2: 3, 3: 5 },
 };
 function sampleLesson() {
-  const d: any = { students: CHILDREN.map((c, i) => ({ id: 'id' + i, no: i + 1, name: c.name, a1_missed: [], zero_notes: {}, stop: [] })),
+  const d: any = { students: CHILDREN.map((c, i) => ({ id: 'id' + i, no: i + 1, name: c.name, zero_notes: {}, stop: [] })),
     stop: { watched: [], turn: 1, turns: 5 }, levelLog: [], activity: { brainBreaks: [], draws: [], stops: [] } };
   fillAll(d, '2026-12-01T15:00:00.000Z');
   return d;
@@ -33,17 +33,22 @@ test('8 fictional children, none from the earlier rosters', () => {
   assert.equal(childByName('joaquin')?.id, 'joaquin'); // accents don't matter for matching
 });
 
-test('Quick Check and box observations become Big 5 evidence', () => {
-  const ev = todayEvidence({ a1: 3, a3: 1, a4: 2, obs: { pep: 'sup', comp: 'ok', ready: 'ok' } });
-  assert.equal(ev.ol3.status, 'obs');   // item 1, all five words
-  assert.equal(ev.ol1.status, 'not');   // item 3, two-step direction
-  assert.equal(ev.pa3.status, 'emg');   // item 4, /h/
+test('Primary screen and box observations become Big 5 evidence', () => {
+  const ev = todayEvidence({ a1: 5, a3: 0, a4: 1, a4_support: 'model', obs: { pep: 'sup', comp: 'ok', ready: 'ok' } } as any);
+  assert.equal(ev.ol3.status, 'obs');   // item 3, all five words
+  assert.equal(ev.ol1.status, 'not');   // item 5, two-step direction
+  assert.equal(ev.pa3.status, 'emg');   // item 6, target sound, but only with a model
   assert.equal(ev.ak3.status, 'emg');   // letters box with support
   assert.equal(ev.cp4.status, 'obs');   // sequencing box
   assert.equal(Object.values(ev).some(e => e.source.includes('Ready')), false); // Brain Break is outside the Big 5
+  assert.equal(todayEvidence({ a1: 3 }).ol3.status, 'emg');   // 3–4 words: emerging
+  assert.equal(todayEvidence({ bonus: 'Completed' }).ol2.status, 'obs');
+  assert.equal(todayEvidence({ bonus: 'Not offered' }).ol2, undefined);
+  // not administered gives no evidence, never "not yet"
+  assert.equal(todayEvidence({ a3: null, a3_status: 'not_administered' } as any).ol1, undefined);
   // second screen replaces the start score for that item
-  assert.equal(todayEvidence({ a4: 1, r4: 3 }).pa3.status, 'obs');
-  // the best evidence wins (strengths-based): word wall ✓ beats item 1 = 1
+  assert.equal(todayEvidence({ a4: 0, r4: 1 }).pa3.status, 'obs');
+  // the best evidence wins (strengths-based): word wall ✓ beats item 3 = 1 word
   assert.equal(todayEvidence({ a1: 1, obs: { wall: 'ok' } }).ol3.status, 'obs');
 });
 
@@ -53,18 +58,20 @@ test('readiness keeps the 70/30 group standard; no evidence and no profile means
   const z = childByName('Zoe')!, l = childByName('Luna')!;
   assert.equal(groupOf(readiness(z, {})), 'adv');
   assert.equal(groupOf(readiness(l, {})), 'beg');
-  assert.equal(todayIndependence({ a1: 3, a2: 2, obs: { wall: 'ok', pep: 'no' } }), 50);
+  assert.equal(todayIndependence({ a1: 5, a2: 0, obs: { wall: 'ok', pep: 'no' } }), 50);
   assert.equal(series(childByName('Elías'), {}, 'ol')[0], null); // joined in October
 });
 
-test('sample lesson scores match the toolkit rules', () => {
+test('sample lesson scores follow the 9-point rules', () => {
   const d = sampleLesson(), sm = S.classSummary(d.students.map(rec));
   assert.equal(sm.screened, 8);
   assert.equal(sm.class_level, 2);
   assert.deepEqual(sm.level_counts, { 1: 1, 2: 5, 3: 2 });
   const joaquin = S.student(rec(d.students[1]));
-  assert.deepEqual(joaquin.flagged_items, [2, 4]);
-  assert.equal(joaquin.end_total, 10);
+  assert.equal(joaquin.start_total, 5);
+  assert.deepEqual(joaquin.flagged_items, [4, 6]);
+  assert.equal(joaquin.end_total, 7);
+  assert.equal(joaquin.end_level, 3);
   assert.ok(sm.stop_percent! > 50);
 });
 

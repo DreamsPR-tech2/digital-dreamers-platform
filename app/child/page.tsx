@@ -64,7 +64,9 @@ function Record({ s, focus }: { s: Student; focus: string[] }) {
             <i>{b.n}</i><b>{b.title}</b><span className="tiny muted">{v ? OBS_L[v] : 'Not recorded'}</span></div>; })}</div>
         <div className="row" style={{ gap: 8 }}>
           <span className="small"><b>Primary screen:</b></span>
-          {r.complete ? <><span className="pill">{r.start_total}/15</span><LevelPill L={r.start_level} />{r.target_met ? <span className="pill ok">Target met</span> : <span className="pill no">Target not yet</span>}
+          {r.complete ? <>{r.start_total !== null ? <span className="pill">{r.start_total}/9</span> : <span className="pill">Item {r.not_administered.join(', ')} not given</span>}
+            {r.needs_teacher_level ? <span className="pill re">Teacher sets level</span> : <LevelPill L={r.start_level} />}
+            {r.start_total === null ? null : r.target_met ? <span className="pill ok">Target met</span> : <span className="pill no">Target not yet</span>}
             {r.rescreen_needed ? (r.rescreen_done ? <span className="pill ok">2nd screen {r.start_total} → {r.end_total}</span> : <span className="pill re">2nd screen: items {r.flagged_items.join(', ')}</span>) : null}</>
             : <span className="pill wait">{r.missing.length < 5 ? `In progress · missing ${r.missing.join(', ')}` : 'Not screened'}</span>}
           <Link href={`/assess/primary/?id=${s.id}&step=${r.complete ? 7 : 0}`} className="small">Open the screen →</Link>

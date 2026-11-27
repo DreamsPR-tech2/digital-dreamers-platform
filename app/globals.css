@@ -242,6 +242,10 @@ details > summary { cursor: pointer; font-weight: 600; color: var(--navy); }
 .sc span { font-size: .86em; color: var(--ink-3); }
 .sc.on { border-color: var(--blue); background: var(--blue-soft); box-shadow: 0 0 0 3px var(--mist); }
 .sc[data-s="0"].on { border-color: var(--ink-3); background: var(--no-soft); box-shadow: none; }
+.scores.six { grid-template-columns: repeat(6, 1fr); }
+.scores.six .sc { min-height: 72px; align-items: center; justify-content: center; }
+.scores.txt .sc { min-height: 72px; justify-content: center; }
+.scores.txt .sc b { font-size: 1.05em; line-height: 1.2; }
 .missed, .zero { margin-top: 12px; padding: 12px; border-radius: 12px; background: var(--canvas); display: flex; flex-direction: column; gap: 8px; }
 .zero { background: var(--red-soft); }
 .subnav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }

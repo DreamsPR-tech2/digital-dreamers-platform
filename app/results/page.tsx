@@ -31,7 +31,8 @@ function Results() {
       <div className="sumbox">
         <div className="stat"><small>Here today</small><b>{here}<em> of {list.length}</em></b></div>
         <div className="stat"><small>Screened</small><b>{sm.screened}<em> of {list.length}</em></b></div>
-        <div className="stat"><small>Met target (8+)</small><b>{sm.target_met}<em> of {sm.screened}</em></b></div>
+        <div className="stat"><small>Met target ({window.WeHelpScoring.TARGET}+ of 9)</small><b>{sm.target_met}<em> of {sm.with_total}</em></b></div>
+        {sm.needs_teacher_level ? <div className="stat"><small>Teacher sets level</small><b>{sm.needs_teacher_level}</b></div> : null}
         <div className="stat"><small>Class level</small><b>{sm.class_level || '–'}</b></div>
         <div className="stat"><small>Levels 1 · 2 · 3</small><b>{sm.level_counts[1]} · {sm.level_counts[2]} · {sm.level_counts[3]}</b></div>
         <div className="stat"><small>Stop check</small><b>{sm.stop_percent === null ? '–' : sm.stop_percent + '%'}<em> {sm.stop_yes + sm.stop_no ? `${sm.stop_yes} of ${sm.stop_yes + sm.stop_no}` : ''}</em></b></div>
@@ -58,9 +59,9 @@ function Results() {
             <td>{s.no}</td><td><span className="row" style={{ gap: 8, flexWrap: 'nowrap' }}><Avatar name={s.name} /><b>{s.name}</b></span></td>
             <td>{s.present === true ? 'Yes' : s.present === false ? 'No' : ''}</td>
             <td className="n">{ob.length ? `${ob.filter(v => v === 'ok').length}/${ob.length}` : ''}</td>
-            <td className="n">{r.complete ? r.start_total : '–'}</td>
-            <td>{r.complete ? (r.target_met ? <span className="pill ok">Yes</span> : <span className="pill no">No</span>) : <span className="pill wait">{r.missing.length < 5 ? 'Missing ' + r.missing.join(',') : 'Not screened'}</span>}</td>
-            <td><LevelPill L={r.start_level} /></td><td>{s.engaged === true ? 'Y' : s.engaged === false ? 'N' : ''}</td>
+            <td className="n">{r.complete && r.start_total !== null ? r.start_total : '–'}</td>
+            <td>{r.complete ? (r.start_total === null ? <span className="pill wait">Item {r.not_administered.join(',')} not given</span> : r.target_met ? <span className="pill ok">Yes</span> : <span className="pill no">No</span>) : <span className="pill wait">{r.invalid ? 'Old scores' : r.missing.length < 5 ? 'Missing ' + r.missing.join(',') : 'Not screened'}</span>}</td>
+            <td>{r.needs_teacher_level ? <Link className="pill re" href={`/assess/primary/?id=${s.id}&step=7`}>Teacher sets level</Link> : <><LevelPill L={r.start_level} />{r.level_override ? <small> teacher</small> : null}</>}{r.teacher_flags.includes('zero_total') ? <span className="pill re">Total 0</span> : null}</td><td>{s.engaged === true ? 'Y' : s.engaged === false ? 'N' : ''}</td>
             <td>{r.rescreen_needed ? (r.rescreen_done ? <span className="pill ok">Done</span> : <span className="pill re">Items {r.flagged_items.join(',')}</span>) : null}</td>
             <td className="n">{r.rescreened ? r.end_total : ''}</td><td>{r.rescreened ? <LevelPill L={r.end_level} /> : null}</td><td className="n">{r.rescreened ? (r.growth! >= 0 ? '+' : '') + r.growth : ''}</td>
             <td className="n">{st.length ? `${st.filter(v => v === 'Y').length}/${st.length}` : ''}</td>

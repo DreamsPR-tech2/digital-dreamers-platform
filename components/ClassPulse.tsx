@@ -15,7 +15,7 @@ const OBS: [Obs, string, string][] = [['ok', '✓', 'Independent'], ['sup', '◐
 function QcMini({ s }: { s: Student }) {
   const r = result(s);
   if (!r.complete) { const n = 5 - r.missing.length; return <span className="qcmini">{n ? `QC ${n}/5` : 'QC –'}</span>; }
-  return <span className="qcmini">{r.start_total}/15 <LevelPill L={r.start_level} pre="L" />{r.rescreen_needed && !r.rescreen_done ? <span className="pill re">2nd</span> : null}</span>;
+  return <span className="qcmini">{r.start_total !== null ? `${r.start_total}/9 ` : ''}{r.needs_teacher_level ? <span className="pill re">set L</span> : <LevelPill L={r.start_level} pre="L" />}{r.rescreen_needed && !r.rescreen_done ? <span className="pill re">2nd</span> : null}</span>;
 }
 
 export default function ClassPulse({ box, title = 'Class · live' }: { box: string | null; title?: string }) {

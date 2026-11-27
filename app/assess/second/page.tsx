@@ -18,7 +18,7 @@ function Second() {
     return <div key={s.id} className="card pad row" style={{ flexWrap: 'nowrap', gap: 12 }}>
       <Avatar name={s.name} />
       <div className="grow"><b style={{ color: 'var(--navy)' }}>{s.name}</b>
-        <div className="small muted">{r.flagged_items.map(n => `item ${n} · ${items[n - 1].area} (scored ${String(s['a' + n])})`).join(' · ')}</div></div>
+        <div className="small muted">{r.flagged_items.map(n => { const it = items.find(x => x.n === n)!; return `item ${n} · ${it.area} (scored ${String(s[it.key])})`; }).join(' · ')}</div></div>
       {r.rescreened ? <span className="row" style={{ gap: 6, flexWrap: 'nowrap' }}><span className="pill">{r.start_total} → {r.end_total}</span><LevelPill L={r.end_level} />
         <span className={'pill ' + ((r.growth ?? 0) > 0 ? 'ok' : '')}>{(r.growth ?? 0) >= 0 ? '+' : ''}{r.growth}</span></span> : null}
       <Link href={`/assess/primary/?id=${s.id}&step=0&re=1`} className={'btn ' + (r.rescreen_done ? 'ghost' : 'warn')}>{r.rescreen_done ? 'Edit' : r.rescreened ? 'Continue' : 'Start'}</Link>
@@ -26,7 +26,7 @@ function Second() {
   return (
     <div className="stack">
       <AssessNav current="second" />
-      <p className="note">Rechecks only the items a Level 1–2 child scored 0 or 1, at the end of the lesson. The result is performance on those items only, not whole-class growth; an unchanged score is still useful for tomorrow’s plan.</p>
+      <p className="note">Rechecks only a Level 1–2 child’s low items (item 3 with 0–2 words, items 4–7 scored 0), at the end of the lesson. The result is performance on those items only, not whole-class growth; an unchanged score is still useful for tomorrow’s plan.</p>
       {notYet ? <p className="small muted">{notYet} child{notYet === 1 ? ' has' : 'ren have'} no finished primary screen yet, so they can’t be flagged. <Link href="/assess/primary/">Go to Primary screen →</Link></p> : null}
       <h3>Waiting ({waiting.length})</h3>
       {waiting.length ? <div className="stack sm">{waiting.map(row)}</div> : <p className="small muted">Nobody is waiting for a second screen.</p>}

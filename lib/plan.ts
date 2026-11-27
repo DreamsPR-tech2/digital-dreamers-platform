@@ -6,10 +6,20 @@
 import { childByName, type Child } from './children.ts';
 import { BIG5, GROUP_LABEL, groupOf, readiness, todayDomainScore, todayEvidence, type DomainId, type Group, type LiveStudent } from './big5.ts';
 
+/** Power Words a child did not show on primary screen item 3 (stored a1_words): all five on No response; none when
+ * item 3 was not recorded or not administered. */
+export const POWER_WORDS = ['help', 'do', 'see', 'go', 'stop'];
+export function missedWords(s: { a1_status?: unknown; a1_words?: unknown }) {
+  if (s.a1_status === 'no_response') return POWER_WORDS.slice();
+  if (s.a1_status !== 'correct' && s.a1_status !== 'attempted') return [];
+  const got = Array.isArray(s.a1_words) ? s.a1_words : [];
+  return POWER_WORDS.filter(w => !got.includes(w));
+}
+
 export type Kind = 'same' | 'chg' | 'new';
 export interface PlanLine { text: string; kind: Kind; why?: string }
 export interface PlanInput {
-  students: (LiveStudent & { id: string; name: string; present?: boolean; a1_missed?: string[]; stop?: ('Y' | 'N' | null)[] })[];
+  students: (LiveStudent & { id: string; name: string; present?: boolean; a1_status?: unknown; a1_words?: unknown; stop?: ('Y' | 'N' | null)[] })[];
   results: { complete: boolean; start_level: number | null; flags: string[]; flagged_items: number[]; rescreen_needed: boolean; rescreen_done: boolean }[];
   summary: { screened: number; class_level: number | null; level_counts: Record<number, number>; stop_percent: number | null; stop_yes: number; stop_no: number; flag_counts: Record<string, number> };
   brainBreaksUsed: string[];
@@ -95,20 +105,20 @@ export function generatePlan(inp: PlanInput): Plan {
 
   /* 5 · Word wall */
   const miss: Record<string, number> = {};
-  students.forEach(s => (s.a1_missed || []).forEach(w => (miss[w] = (miss[w] || 0) + 1)));
+  students.forEach(s => missedWords(s).forEach(w => (miss[w] = (miss[w] || 0) + 1)));
   const missed = Object.entries(miss).sort((a, b) => b[1] - a[1]);
   const pre = flagged('preteach_words');
   if (pre.length && missed.length) {
     const wi = C.words.findIndex(w => w.en === missed[0][0]); if (wi >= 0) P.board.word = wi;
     add('wall', `Pre-teach before the reader: ${missed.map(([w, n]) => `${w.toUpperCase()} (${n})`).join(' · ')}`, 'chg', `${pre.length} of ${sm.screened} screened had a Power Word to pre-teach`);
     add('wall', `Start the wall on ${missed[0][0].toUpperCase()}, then the rest as a quick review`, 'new', `${missed[0][0]} missed by ${missed[0][1]}`);
-    pre.forEach(s => { const m = s.a1_missed || []; if (m.length) P.kid[s.id].push('Pre-teach ' + m.join(', ')); });
+    pre.forEach(s => { const m = missedWords(s); if (m.length) P.kid[s.id].push('Pre-teach ' + m.join(', ')); });
   } else add('wall', 'Five Power Words, one card at a time · say it, show it');
 
   /* 6 · Letters */
   const snd = flagged('sound_game'), letK = students.filter(s => notOk(s, 'pep'));
   if (snd.length) { P.board.letter = Math.max(0, C.letters.findIndex(l => l.L === 'H'));
-    add('pep', 'Quick /h/ sound game first: HELP or SEE? (2 minutes)', 'chg', `${snd.length} of ${sm.screened} scored 0–1 on the target sound`);
+    add('pep', 'Quick /h/ sound game first: HELP or SEE? (2 minutes)', 'chg', `${snd.length} of ${sm.screened} did not produce the target sound`);
     snd.forEach(s => P.kid[s.id].push('/h/ sound game')); }
   else add('pep', 'H · D · S · G with the word for each');
   if (letK.length) add('pep', `Tactile letter cards for ${names(letK)}`, 'chg', `${letK.length} needed support on letters`);

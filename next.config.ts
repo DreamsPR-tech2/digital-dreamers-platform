@@ -10,5 +10,8 @@ const config: NextConfig = {
   basePath: base || undefined,
   images: { unoptimized: true },
   devIndicators: false,
+  // Pin the project root: a stray package-lock.json higher up (e.g. in the home folder) otherwise makes Next.js
+  // treat that folder as the workspace root, and dev/build crawl it.
+  outputFileTracingRoot: __dirname,
 };
 export default config;

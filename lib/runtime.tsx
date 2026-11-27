@@ -2,7 +2,7 @@
 /* Bridge between React and the We Help! runtime that the pilot already runs in class.
  *
  * public/runtime/*.js are the pilot's own files (store.js: local / Supabase sync with offline queue + board link;
- * scoring.js: Quick Check rules; screen-items.js: item wording and rubric). They load as plain scripts before React
+ * scoring.js: the 9-point primary screen rules; screen-items.js: item wording). They load as plain scripts before React
  * starts (see app/layout.tsx), so the platform reads and writes exactly the same data the pilot portal does.
  * This file only adds types and a provider that re-renders the app when the data or the board changes.
  */
@@ -19,7 +19,10 @@ export interface Student {
   id: string; no: number; name: string;
   a1?: number | null; a2?: number | null; a3?: number | null; a4?: number | null; a5?: number | null;
   r1?: number | null; r2?: number | null; r3?: number | null; r4?: number | null; r5?: number | null;
-  a1_missed?: string[]; bonus?: number | null; zero_notes?: Record<string, string>;
+  /* 9-point screen: a1–a5 = items 3–7. Each has a status (a1_status…) and what the screener recorded (a1_words,
+   * a2_count/_mode/_support, a3_steps/_in_order/_support, a4_sound, a5_anchor/_mode/_support); r-prefixed for the second screen. */
+  a1_words?: string[]; a1_missed?: string[]; bonus?: string | null; zero_notes?: Record<string, string>;
+  level_override?: number | null; level_override_reason?: string; level_override_by?: string;
   response_mode?: string | null; engaged?: boolean | null; engagement_note?: string;
   started_at?: string; finished_at?: string; re_started_at?: string; recorded_by?: string; screened_by?: string;
   present?: boolean; present_at?: string;
@@ -54,13 +57,18 @@ export interface SyncStatus {
   mode: 'local' | 'synced'; ready?: boolean; online?: boolean; pending?: number; error?: string | null; lastSync?: string | null;
   signedIn?: boolean; member?: Me | null; loaded?: boolean;
 }
+export type ItemStatus = 'correct' | 'attempted' | 'no_response' | 'not_administered';
 export interface StudentResult {
-  complete: boolean; missing: number[]; start_total: number | null; target_met: boolean | null; start_level: 1 | 2 | 3 | null;
-  flags: string[]; flagged_items: number[]; rescreen_needed: boolean; rescreen_done: boolean; rescreened: boolean;
+  complete: boolean; invalid?: string; missing: number[]; not_administered: number[];
+  items: { n: number; score: number | null; status: ItemStatus | null; done: boolean }[];
+  start_total: number | null; partial_total: number | null; target_met: boolean | null;
+  auto_level: 1 | 2 | 3 | null; level_override: 1 | 2 | 3 | null; start_level: 1 | 2 | 3 | null; needs_teacher_level: boolean;
+  flags: string[]; teacher_flags: string[]; flagged_items: number[]; rescreen_needed: boolean; rescreen_done: boolean; rescreened: boolean;
   end_total: number | null; end_level: number | null; growth: number | null;
 }
 export interface ClassSummary {
-  students: StudentResult[]; screened: number; not_screened: number; target_met: number;
+  students: StudentResult[]; screened: number; not_screened: number; target_met: number; with_total: number; needs_teacher_level: number;
+  teacher_flag_counts: Record<string, number>;
   level_counts: Record<1 | 2 | 3, number>; class_level: 1 | 2 | 3 | null; flag_counts: Record<string, number>;
   rescreen_list: number[]; stop_yes: number; stop_no: number; stop_percent: number | null;
   recommendations: { flag: string; text: string; students: number | null }[];
@@ -75,12 +83,15 @@ export interface StoreApi {
   board: { send(cmd: string, ...args: unknown[]): void; state(): BoardState | null; connected(): boolean; subscribe(fn: (s: BoardState) => void): void; ping(): void };
 }
 export interface ScoringApi {
-  ITEMS: number[]; TARGET: number; MAX_TOTAL: number; BIG5: string[]; RESPONSE_MODES: string[]; FLAGS: Record<string, string>;
+  ITEMS: number[]; KEY: Record<number, string>; MAX: Record<number, number>; TARGET: number; MAX_TOTAL: number; BIG5: string[]; RESPONSE_MODES: string[];
+  FLAGS: Record<string, string>; TEACHER_FLAGS: Record<string, string>; STATUS: Record<ItemStatus, string>; SUPPORT: Record<string, string>; BONUS: string[];
+  ITEM_INFO: Record<number, { area: string; max: number }>;
+  scoreItem(n: number, x: Record<string, unknown>): { score: number | null; status: ItemStatus } | null;
   student(rec: Record<string, unknown>): StudentResult; classSummary(recs: Record<string, unknown>[]): ClassSummary;
   missingItems(rec: Record<string, unknown>): number[]; pickerOrder(recs: Record<string, unknown>[]): number[];
   toCSV(recs: Record<string, unknown>[], date: string): string; csvFileName(date: string): string; level(t: number | null): number | null; stopPercent(yes: number, no: number): number | null;
 }
-export interface ScreenItem { n: number | 'bonus'; key: string; area: string; draft: boolean; optional?: boolean; show: string; say: string; rubric: string[]; mat: string[] }
+export interface ScreenItem { n: number; key: string; area: string; draft: boolean; optional?: boolean; input: 'words' | 'count' | 'steps' | 'sound' | 'anchor' | 'bonus'; show: string; say: string; rule: string; mat: string[] }
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type Content = any; // window.WEHELP from board-content.js (boxes, brainBreaks, places, words, letters, readers, notes…)
 
@@ -139,3 +150,4 @@ export const useRuntime = () => useContext(Ctx);
 /** Primary screen (toolkit Quick Check) flag wording for the platform. scoring.js stays exactly as the pilot ships it; it calls the five
  * lesson words "Big 5 words", which the platform calls Power Words so they never get confused with the Big 5 domains. */
 export const flagText = (f: string) => (window.WeHelpScoring.FLAGS[f] || f).replace(/Big 5 words/g, 'Power Words');
+export const teacherFlagText = (f: string) => window.WeHelpScoring.TEACHER_FLAGS[f] || f;

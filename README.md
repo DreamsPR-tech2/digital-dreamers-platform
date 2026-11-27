@@ -22,7 +22,7 @@ The board is at `/board/board.html` (add `?date=2026-12-01` to rehearse).
 |---|---|---|
 | Today | everyone | Unit timeline (Unit 1 → Unit 2 Nov 10 → today → tomorrow), live tiles, who to watch, the lesson box by box |
 | Lesson | lesson lead | Drives the classroom board + **class panel**: every child, every box, recorded live (✓ ◐ ○) |
-| Assess | assistant (screener) · classroom teacher | One tab, four parts, in this order: **By part** (default; every child × every board part: ✓ ◐ ○ buttons for the part on the board now, a dropdown for finished parts, blank for later parts; same data as the Lesson class panel) · **Primary screen** (the toolkit's Quick Check: 5 items 0–3, rubric, 5-second wait, item 1 by tapping the Power Words the child gets, bonus, mode, engagement) · **Stop check** (follows the lesson: shows what the board is doing, jumps to each new STOP; Yes/No per stop; add or remove stops) · **Second screen** (flagged children and items, start → end) |
+| Assess | assistant (screener) · classroom teacher | One tab, four parts, in this order: **By part** (default; every child × every board part: ✓ ◐ ○ buttons for the part on the board now, a dropdown for finished parts, blank for later parts; same data as the Lesson class panel) · **Primary screen** (the 9-point screen: items 3–7, item 3 by tapping the Power Words the child shows (0–5), items 4–7 scored 0–1 from what the screener records (count, steps, sound, words of “We help.”, mode, support), No response / Not administered on every item, item 8 bonus not scored, 5-second wait, mode, engagement, teacher level override) · **Stop check** (follows the lesson: shows what the board is doing, jumps to each new STOP; Yes/No per stop; add or remove stops) · **Second screen** (flagged children and items, start → end) |
 | Results | tech / everyone | Totals, levels, stop check, Big 5 evidence by domain, game log, reader-level log, CSV (no names) |
 | Tomorrow | lesson lead | Plan for the next school day, box by box, each change with its reason; groups; per-child focus; family note; **Set up the board for tomorrow** |
 | Class · Child | everyone | Profiles, supports, readiness group, Big 5 Sep → Dec, last four lessons, checklist with where each mark came from |
@@ -65,12 +65,17 @@ The platform's copies also use their own browser-storage keys (`dreams-platform:
 - **Game:** GO and STOP only (GO: everyone moves; STOP: freeze; GO again). No MOVE cue.
 
 ### Lesson-day changes from the pilot portal (platform only)
-- Primary screen (the toolkit's Quick Check) item 1: the screener taps the Power Words the child **gets**; the score follows. Still stored as the
-  pilot's `a1_missed`, so the data and CSV are unchanged. No card mat.
+- Primary screen: same 9-point rules and fields as the pilot portal (`a1`–`a5` = items 3–7, `a1_words` = Power Words shown,
+  per-item `_status`, `level_override`). No card mat. Old 0–3 scores still on a device show as “Old 0–3 scores · screen again”.
 - Lesson: right after STOP, the lead (or whoever has the Lesson screen) marks which watched children stopped.
   The marks are the same ones as on the Stop check tab.
 - Stop check: the number of stops follows the game: the first STOP sets it to 1 and each STOP adds one. The
   teacher can add or remove stops (database range 1–20).
+
+### Reader and game (Nov 26, from the pilot)
+- Read together uses “The Lost Phone / El teléfono perdido” (Levels 1–3, `public/board/img/reader/`): one story page per
+  spread, picture left and words right, with a 3D page turn. Comprehension cards come from the reader's `seq` pages.
+- The four game places have their photos (`public/board/img/place-*.jpg`).
 
 ### New data the platform records
 Saved on each child in the same store, so in synced mode it goes to `students.meta` and syncs like the pilot's other
@@ -89,8 +94,9 @@ Two roles, chosen at sign-in (in synced mode they come from the Supabase team li
 ## Rules
 - **Naming:** "Big 5" always means Head Start's five domains. The five lesson words (help, do, see, go, stop) are
   **Power Words**. The pilot files call them "Big 5 words"; the platform rewrites that wording when it displays it.
-- **Big 5 evidence** (`lib/big5.ts`): primary screen item 1 → Oral Language (key words), 2 and 5 → Oral Language (phrases),
-  3 → two-step direction, 4 → Phonological Awareness (initial sound); boxes: Today → greeting, Plan → visual schedule,
+- **Big 5 evidence** (`lib/big5.ts`): primary screen item 3 → Oral Language (key words; 5 words observed, 3–4 emerging),
+  4 and 7 → Oral Language (phrases), 5 → two-step direction, 6 → Phonological Awareness (target sound); a 1-point item done
+  with a prompt or model counts as emerging; Not administered gives no evidence; bonus Completed → observed, Attempted → emerging; boxes: Today → greeting, Plan → visual schedule,
   Move together → names helpers, Word wall → key words, Letters → letter–sound, Read together → who/what,
   Comprehension → First · Next · Last. Brain Break and stop check are regulation / executive function, outside the Big 5.
   The best evidence per indicator counts (strengths-based); a second screen replaces the start score for that item.

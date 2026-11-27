@@ -33,7 +33,7 @@ function Class() {
             <div className="small muted">{c ? `${c.age} · ${c.tag}` : 'No profile yet'}</div></div><div style={{ textAlign: 'right' }}><GroupPill g={g} /><div className="tiny muted" style={{ marginTop: 3 }}>{sc ?? '–'} readiness</div></div></div>
           {c ? <div className="row" style={{ gap: 5 }}><span className="pill plum">{c.mode}</span><span className="pill">{c.home === 'es' ? 'Spanish at home' : c.home === 'en' ? 'English at home' : 'Bilingual home'}</span></div> : null}
           <div className="bars">{BIG5.map(d => { const v = domainScore(c, ev, d.id); return <div key={d.id} className="bar"><span>{d.id.toUpperCase()}</span><span className="tr"><i style={{ width: (v ?? 0) + '%', background: d.color }} /></span><span>{v ?? '–'}</span></div>; })}</div>
-          <div className="row small" style={{ gap: 6 }}><span className="muted">Today:</span>{r.complete ? <><span className="pill">{r.start_total}/15</span><LevelPill L={r.start_level} /></> : <span className="pill wait">Not screened</span>}
+          <div className="row small" style={{ gap: 6 }}><span className="muted">Today:</span>{r.complete ? <>{r.start_total !== null ? <span className="pill">{r.start_total}/9</span> : null}{r.needs_teacher_level ? <span className="pill re">Teacher sets level</span> : <LevelPill L={r.start_level} />}</> : <span className="pill wait">Not screened</span>}
             {s.present === false ? <span className="pill wait">not here</span> : null}{r.flags.length ? <span className="pill re">{r.flags.length} flag{r.flags.length > 1 ? 's' : ''}</span> : null}</div>
         </Link>; })}</div>
     </div>);

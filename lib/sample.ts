@@ -7,23 +7,43 @@ import type { Obs } from './runtime.tsx';
 
 type S = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-/* per child: box observations, Quick Check (a1..a5, missed words, bonus, mode, engaged), second screen, stop marks */
-const SAMPLE: Record<string, { obs: Record<string, Obs>; qc: [number, number, number, number, number]; missed: string[]; bonus?: number;
-  mode: string; engaged: boolean; note?: string; zero?: Record<string, string>; re?: Record<string, number>; stop?: ('Y' | 'N')[]; help?: string[] }> = {
-  natalia: { obs: { intro: 'ok', today: 'ok', ready: 'ok', move: 'ok', wall: 'ok', pep: 'sup', read: 'ok', comp: 'ok' }, qc: [3, 3, 3, 2, 3], missed: [], bonus: 3, mode: 'Spanish', engaged: true },
-  joaquin: { obs: { intro: 'ok', today: 'ok', ready: 'ok', move: 'sup', wall: 'sup', pep: 'no', read: 'sup', comp: 'ok' }, qc: [2, 1, 2, 1, 2], missed: ['do', 'see'], mode: 'AAC', engaged: true,
-    re: { r2: 2, r4: 2 }, stop: ['Y', 'Y', 'N', 'Y', 'Y'], help: ['help_asked'] },
-  zoe:     { obs: { intro: 'ok', today: 'ok', ready: 'ok', move: 'ok', wall: 'ok', pep: 'ok', read: 'ok', comp: 'sup' }, qc: [3, 3, 3, 3, 2], missed: [], bonus: 2, mode: 'speech', engaged: true },
-  mason:   { obs: { intro: 'ok', today: 'sup', ready: 'sup', move: 'ok', wall: 'ok', pep: 'sup', read: 'sup', comp: 'sup' }, qc: [3, 2, 1, 2, 2], missed: [], mode: 'speech', engaged: true,
+/* per child: box observations; primary screen (9-point: item 3 words shown, item 4 how many words + support, item 5 steps,
+ * item 6 sound, item 7 words of "We help." + support), bonus, mode, engaged; second screen; stop marks */
+type QC = { words: string[]; count: number; sup4?: string; steps: [number, boolean]; sup5?: string; sound: boolean; anchor: number; sup7?: string };
+const SAMPLE: Record<string, { obs: Record<string, Obs>; qc: QC; bonus?: string;
+  mode: string; engaged: boolean; note?: string; zero?: Record<string, string>; re?: Record<string, unknown>; stop?: ('Y' | 'N')[]; help?: string[] }> = {
+  natalia: { obs: { intro: 'ok', today: 'ok', ready: 'ok', move: 'ok', wall: 'ok', pep: 'sup', read: 'ok', comp: 'ok' },
+    qc: { words: ['help', 'do', 'see', 'go', 'stop'], count: 5, steps: [2, true], sound: true, anchor: 2 }, bonus: 'Completed', mode: 'Spanish', engaged: true },
+  joaquin: { obs: { intro: 'ok', today: 'ok', ready: 'ok', move: 'sup', wall: 'sup', pep: 'no', read: 'sup', comp: 'ok' },
+    qc: { words: ['help', 'go', 'stop'], count: 2, sup4: 'model', steps: [2, true], sup5: 'prompt', sound: false, anchor: 2, sup7: 'prompt' }, mode: 'AAC', engaged: true,
+    re: { r2: 1, r2_status: 'correct', r2_count: 4, r4: 1, r4_status: 'correct', r4_sound: true }, stop: ['Y', 'Y', 'N', 'Y', 'Y'], help: ['help_asked'] },
+  zoe:     { obs: { intro: 'ok', today: 'ok', ready: 'ok', move: 'ok', wall: 'ok', pep: 'ok', read: 'ok', comp: 'sup' },
+    qc: { words: ['help', 'do', 'see', 'go', 'stop'], count: 5, steps: [2, true], sound: true, anchor: 1 }, bonus: 'Attempted', mode: 'speech', engaged: true },
+  mason:   { obs: { intro: 'ok', today: 'sup', ready: 'sup', move: 'ok', wall: 'ok', pep: 'sup', read: 'sup', comp: 'sup' },
+    qc: { words: ['help', 'do', 'see', 'go', 'stop'], count: 4, steps: [1, true], sup5: 'prompt', sound: false, anchor: 1 }, mode: 'speech', engaged: true,
     stop: ['N', 'Y', 'N', 'N', 'Y'], help: ['help_offered'] },
-  luna:    { obs: { intro: 'ok', today: 'sup', ready: 'sup', move: 'sup', wall: 'sup', pep: 'no', read: 'no', comp: 'sup' }, qc: [1, 1, 1, 0, 1], missed: ['do', 'see', 'go'], mode: 'sign', engaged: true,
+  luna:    { obs: { intro: 'ok', today: 'sup', ready: 'sup', move: 'sup', wall: 'sup', pep: 'no', read: 'no', comp: 'sup' },
+    qc: { words: ['help'], count: 1, sup4: 'model', steps: [1, true], sup5: 'model', sound: false, anchor: 2, sup7: 'model' }, mode: 'sign', engaged: true,
     zero: { a4: 'Did not seem to understand' }, stop: ['Y', 'Y', 'Y', 'N', 'Y'], help: ['support'] },
-  thiago:  { obs: { intro: 'ok', today: 'ok', ready: 'no', move: 'sup', wall: 'ok', pep: 'ok', read: 'sup', comp: 'no' }, qc: [2, 2, 2, 1, 1], missed: ['do'], mode: 'pointing', engaged: false,
+  thiago:  { obs: { intro: 'ok', today: 'ok', ready: 'no', move: 'sup', wall: 'ok', pep: 'ok', read: 'sup', comp: 'no' },
+    qc: { words: ['help', 'see', 'go', 'stop'], count: 3, steps: [2, false], sound: false, anchor: 1 }, mode: 'pointing', engaged: false,
     note: 'Needed headphones during the game; engaged again after Calm Breathing', stop: ['N', 'N', 'Y', 'N', 'N'], help: ['support'] },
-  elias:   { obs: { intro: 'sup', today: 'ok', ready: 'ok', move: 'ok', wall: 'sup', pep: 'ok', read: 'ok', comp: 'ok' }, qc: [2, 1, 2, 2, 1], missed: ['see', 'do'], mode: 'speech', engaged: true },
-  aurora:  { obs: { intro: 'ok', today: 'ok', ready: 'ok', move: 'no', wall: 'sup', pep: 'sup', read: 'sup', comp: 'sup' }, qc: [1, 1, 2, 1, 1], missed: ['do', 'see', 'go'], mode: 'Spanish', engaged: true,
+  elias:   { obs: { intro: 'sup', today: 'ok', ready: 'ok', move: 'ok', wall: 'sup', pep: 'ok', read: 'ok', comp: 'ok' },
+    qc: { words: ['help', 'go', 'stop'], count: 3, sup4: 'prompt', steps: [2, true], sound: true, anchor: 1 }, mode: 'speech', engaged: true },
+  aurora:  { obs: { intro: 'ok', today: 'ok', ready: 'ok', move: 'no', wall: 'sup', pep: 'sup', read: 'sup', comp: 'sup' },
+    qc: { words: ['help', 'stop'], count: 2, steps: [2, true], sound: false, anchor: 2 }, mode: 'Spanish', engaged: true,
     stop: ['Y', 'Y', 'Y', 'Y', 'N'], help: ['help_asked'] },
 };
+/** Writes one sample primary screen in the same fields the Assess screen records (score + status per item). */
+function writeQC(s: S, q: QC, mode: string) {
+  const st = (v: number) => (v > 0 ? 'correct' : 'attempted');
+  s.a1_words = q.words.slice(); s.a1_done = true; s.a1 = q.words.length; s.a1_status = st(s.a1);
+  s.a2_count = q.count; s.a2_mode = mode; s.a2_support = q.sup4 || 'independent'; s.a2 = q.count >= 3 ? 1 : 0; s.a2_status = st(s.a2);
+  s.a3_steps = q.steps[0]; s.a3_in_order = q.steps[0] === 2 ? q.steps[1] : null; s.a3_support = q.sup5 || 'independent';
+  s.a3 = q.steps[0] === 2 && q.steps[1] ? 1 : 0; s.a3_status = st(s.a3);
+  s.a4_sound = q.sound; s.a4 = q.sound ? 1 : 0; s.a4_status = st(s.a4);
+  s.a5_anchor = q.anchor; s.a5_mode = mode; s.a5_support = q.sup7 || 'independent'; s.a5 = q.anchor === 2 ? 1 : 0; s.a5_status = st(s.a5);
+}
 const STOP_WATCH = ['joaquin', 'mason', 'luna', 'thiago', 'aurora'];
 
 const pid = (s: S) => childByName(s.name)?.id || '';
@@ -59,8 +79,8 @@ export function fillQuickCheck(d: S, nowISO: string, withSecond = true) {
   for (const s of d.students as S[]) {
     const p = SAMPLE[pid(s)]; if (!p || s.present === false) continue;
     if (['a1', 'a2', 'a3', 'a4', 'a5'].some(k => s[k] !== null && s[k] !== undefined)) continue; // already (partly) screened
-    p.qc.forEach((v, i) => (s['a' + (i + 1)] = v));
-    s.a1_missed = p.missed.slice(); s.zero_notes = { ...(p.zero || {}) }; s.bonus = p.bonus ?? null;
+    writeQC(s, p.qc, p.mode);
+    s.zero_notes = { ...(p.zero || {}) }; s.bonus = p.bonus ?? null;
     s.response_mode = p.mode; s.engaged = p.engaged; s.engagement_note = p.note || '';
     s.started_at = at(t0, k * 3); s.finished_at = at(t0, k * 3 + 2.5); s.screened_by = 'Sample'; k++;
     if (withSecond && p.re) { Object.assign(s, p.re); s.re_started_at = at(t0, 30); }

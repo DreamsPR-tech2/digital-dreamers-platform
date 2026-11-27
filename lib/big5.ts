@@ -61,13 +61,24 @@ export const BOX_OBS: Record<string, { label: string; question: string; b5: stri
   read:  { label: 'Answers who or what about the reader', question: 'Did they answer who or what about the reader?', b5: 'cp3', short: 'Reader' },
   comp:  { label: 'Puts the story pictures in order', question: 'Did they put the story pictures in order?', b5: 'cp4', short: 'Order' },
 };
-/** Primary screen (toolkit Quick Check) items → Big 5 indicators (Toolkit v2.0 items, scored 0–3). */
+/** Primary screen (9-point screen) items → Big 5 indicators. Keys are the stored fields:
+ * a1 = item 3 receptive vocabulary (0–5), a2 = item 4 expressive (0–1), a3 = item 5 two-step direction (0–1),
+ * a4 = item 6 target sound (0–1), a5 = item 7 anchor sentence (0–1), bonus = item 8 (not scored). */
 export const QC_B5: Record<string, string> = { a1: 'ol3', a2: 'ol2', a3: 'ol1', a4: 'pa3', a5: 'ol2', bonus: 'ol2' };
+export const QC_ITEM: Record<string, number> = { a1: 3, a2: 4, a3: 5, a4: 6, a5: 7, bonus: 8 };
 export const OBS_TO_B5: Record<string, B5Status> = { ok: 'obs', sup: 'emg', no: 'not' };
-export const scoreToB5 = (v: number): B5Status => (v >= 3 ? 'obs' : v === 2 ? 'emg' : 'not');
+/** One primary-screen score → Big 5 status. Item 3: all 5 words observed, 3–4 emerging. Items 4–7: 1 point is
+ * observed, or emerging when the screener recorded that it needed a prompt or a model. */
+export function scoreToB5(k: string, v: number, support?: unknown): B5Status {
+  if (k === 'a1' || k === 'r1') return v >= 5 ? 'obs' : v >= 3 ? 'emg' : 'not';
+  return v >= 1 ? (support === 'prompt' || support === 'model' ? 'emg' : 'obs') : 'not';
+}
+export const BONUS_B5: Record<string, B5Status> = { Completed: 'obs', Attempted: 'emg' };
+/** Full marks on one item (item 3: all 5 words; items 4–7: 1 point). */
+export const fullMarks = (k: string, v: number) => v >= (k === 'a1' ? 5 : 1);
 const RANK: Record<B5Status, number> = { nop: 0, not: 1, emg: 2, obs: 3 };
 
-export interface LiveStudent { a1?: number | null; a2?: number | null; a3?: number | null; a4?: number | null; a5?: number | null; bonus?: number | null;
+export interface LiveStudent { a1?: number | null; a2?: number | null; a3?: number | null; a4?: number | null; a5?: number | null; bonus?: string | null;
   r1?: number | null; r2?: number | null; r3?: number | null; r4?: number | null; r5?: number | null; obs?: Record<string, string>;
   b5?: Record<string, B5Status> }
 const given = (v: unknown): v is number => v !== null && v !== undefined && v !== '';
@@ -80,11 +91,13 @@ export function todayEvidence(s: LiveStudent): Record<string, Evidence> {
     const cur = out[ind]; if (!cur || RANK[status] > RANK[cur.status]) out[ind] = { ind, status, source };
   };
   for (const [box, v] of Object.entries(s.obs || {})) { const m = BOX_OBS[box]; if (m?.b5 && OBS_TO_B5[v]) add(m.b5, OBS_TO_B5[v], `Box · ${m.short}`); }
+  const x = s as Record<string, unknown>;
   for (const [k, ind] of Object.entries(QC_B5)) {
-    const n = k === 'bonus' ? null : k.slice(1);
-    const re = n ? (s as Record<string, unknown>)['r' + n] : null;
-    const v = given(re) ? re : (s as Record<string, unknown>)[k];
-    if (given(v)) add(ind, scoreToB5(v), k === 'bonus' ? 'Primary screen · bonus' : `Primary screen · item ${n}${given(re) ? ' (2nd screen)' : ''}`);
+    if (k === 'bonus') { const b = BONUS_B5[String(x.bonus)]; if (b) add(ind, b, 'Primary screen · item 8 bonus'); continue; }
+    const rk = 'r' + k.slice(1), re = x[rk], useRe = given(re) && x[rk + '_status'] !== 'not_administered';
+    const v = useRe ? re : x[k];
+    if (given(v) && x[(useRe ? rk : k) + '_status'] !== 'not_administered')
+      add(ind, scoreToB5(k, v, x[(useRe ? rk : k) + '_support']), `Primary screen · item ${QC_ITEM[k]}${useRe ? ' (2nd screen)' : ''}`);
   }
   // the teacher's own checklist mark (child record → Big 5) always wins over automatic evidence
   for (const [ind, st] of Object.entries(s.b5 || {})) if (INDICATOR[ind] && st) out[ind] = { ind, status: st, source: 'Teacher observation' };
@@ -117,11 +130,11 @@ export function domainScore(child: Child | null, ev: Record<string, Evidence>, d
 }
 export function composite(child: Child | null, ev: Record<string, Evidence>) { return avg(BIG5.map(d => domainScore(child, ev, d.id))); }
 
-/** Today's independence: share of box observations marked ✓ and primary screen items scored 3. */
+/** Today's independence: share of box observations marked ✓ and primary screen items with full marks. */
 export function todayIndependence(s: LiveStudent): number | null {
   let ok = 0, n = 0;
   for (const v of Object.values(s.obs || {})) { n++; if (v === 'ok') ok++; }
-  for (const k of ['a1', 'a2', 'a3', 'a4', 'a5'] as const) { const v = s[k]; if (given(v)) { n++; if (v === 3) ok++; } }
+  for (const k of ['a1', 'a2', 'a3', 'a4', 'a5'] as const) { const v = s[k]; if (given(v)) { n++; if (fullMarks(k, v)) ok++; } }
   return n ? Math.round((ok / n) * 100) : null;
 }
 
