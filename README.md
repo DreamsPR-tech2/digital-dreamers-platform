@@ -77,6 +77,18 @@ The platform's copies also use their own browser-storage keys (`dreams-platform:
   spread, picture left and words right, with a 3D page turn. Comprehension cards come from the reader's `seq` pages.
 - The four game places have their photos (`public/board/img/place-*.jpg`).
 
+### Brand (Nov 27, DREAMS Brand Use Guide v1.0)
+- Fonts: Baloo 2 ExtraBold for headings and display, Nunito (400, 600, 700, italic) for text. Self-hosted in
+  `public/fonts/` and `public/board/fonts/` (Fontsource 5.3.0, OFL), no CDN.
+- Colours: primary palette (Blue #2E86D1, Yellow #FFC20E, Red #E63946, Charcoal #2B2B2B, Light Neutral #F6F6F6),
+  navy #102A5E for headings and structure, guide tints for callouts. One alternate palette, Bold Creative
+  (Deep Blue, Coral, Teal, Purple), only for categories: board boxes and Big 5 domains.
+- Board boxes: 1 Today blue · 2 Plan navy · 3 Brain Break teal · 4 Move together red · 5 Word wall yellow ·
+  6 Letters purple · 7 Read together coral · 8 Comprehension deep blue. Navy text on the light fills (`--cNt`).
+- Gaps filled: status colours (teal ok, yellow flag, red no, grey wait), reader levels and readiness groups on one
+  blue scale (no red for Level 1), light-only colour scheme, 13px caption floor, sentence case, flat cards (no
+  shadows or gradients except the reader's page-turn shading and the skipped-box stripes).
+
 ### New data the platform records
 Saved on each child in the same store, so in synced mode it goes to `students.meta` and syncs like the pilot's other
 per-child fields (no database change needed):
@@ -116,7 +128,6 @@ Two roles, chosen at sign-in (in synced mode they come from the Supabase team li
 
 ## Open items
 - Spanish teacher UI (the Nov 10 demo had an ES toggle; this build is English for teachers, bilingual on the board).
-- Brand fonts (Baloo 2 / Nunito per the toolkit); Poppins for now, as in the pilot.
-- Design system artifact → tokens (colors here come from the Nov 10 demo).
+- Official DREAMS logo files (PNG/SVG, plus the “¡Atrévete a Soñar!” and long-name lockups). The headers still draw the logo in CSS until they arrive.
 - Indicator wording and the primary screen → Big 5 mapping to confirm with Kristen & Cari.
 - Saved plans to sync across iPads (today they stay on the iPad that saved them).

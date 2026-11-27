@@ -87,7 +87,7 @@
       out += '<path d="M0 0L'+(r*Math.cos(a0)).toFixed(2)+' '+(r*Math.sin(a0)).toFixed(2)+'A'+r+' '+r+' 0 0 1 '+(r*Math.cos(a1)).toFixed(2)+' '+(r*Math.sin(a1)).toFixed(2)+'Z" fill="'+p.color+'" stroke="#fff" stroke-width="3"/>'
         + '<g transform="rotate('+c.toFixed(1)+') translate(0 -62)"><text class="wl-en" text-anchor="middle">'+esc(p.en)+'</text><text class="wl-es" text-anchor="middle" y="13">'+esc(p.es)+'</text></g>';
     });
-    return out + '<circle r="98" fill="none" stroke="#2A3D66" stroke-width="4"/></svg>';
+    return out + '<circle r="98" fill="none" stroke="#102A5E" stroke-width="4"/></svg>';
   }
   var BODY = {
     // Two cards: who is here · calendar. On the board overview they sit side by side. When the box is open,
@@ -102,7 +102,7 @@
     },
     today: function(){
       return '<div class="today"><div class="td-plan">'
-        + C.plan.map(function(p){ var b = boxById(p.box); return '<div class="prow" data-box="'+p.box+'" style="--pc:var(--'+b.color+');--pcl:var(--'+b.color+'l)"><span class="pn">'+b.n+'</span>'+ICON[p.icon]+bi(b.title, b.es)+'</div>'; }).join('')
+        + C.plan.map(function(p){ var b = boxById(p.box); return '<div class="prow" data-box="'+p.box+'" style="--pc:var(--'+b.color+');--pcl:var(--'+b.color+'l);--pct:var(--'+b.color+'t)"><span class="pn">'+b.n+'</span>'+ICON[p.icon]+bi(b.title, b.es)+'</div>'; }).join('')
         + '</div></div>';
     },
     ready: function(){
@@ -142,7 +142,7 @@
   // ---------- build the board ----------
   var boardEl = $('#board');
   boardEl.innerHTML = BOXES.map(function(b){
-    return '<article class="panel'+(b.span>1?' span'+b.span:'')+'" data-step="'+b.n+'" data-box="'+b.id+'" style="--c:var(--'+b.color+');--cl:var(--'+b.color+'l)">'
+    return '<article class="panel'+(b.span>1?' span'+b.span:'')+'" data-step="'+b.n+'" data-box="'+b.id+'" style="--c:var(--'+b.color+');--cl:var(--'+b.color+'l);--ct:var(--'+b.color+'t)">'
       + CHECK(b.color) + '<div class="head"><div class="num">'+b.n+'</div><div class="ttl"><b>'+esc(b.title)+'</b><i>'+esc(b.es)+'</i></div></div>'
       + '<div class="body">'+BODY[b.id]()+'</div></article>';
   }).join('');
@@ -550,7 +550,7 @@
   });
 
   function confetti(){
-    var cols = ['#2E86D1','#FFC20E','#E63946','#3FA35B','#7A4FBF','#1FA594'];
+    var cols = ['#2E86D1','#FFC20E','#E63946','#2E86D1','#FFC20E','#E63946'];   // primary palette only
     for(var i=0;i<60;i++){ var d = document.createElement('i'); d.className = 'confetti'; d.style.left = (Math.random()*100)+'%'; d.style.background = cols[i%cols.length]; d.style.animationDuration = (4+Math.random()*4)+'s'; d.style.animationDelay = (Math.random()*2)+'s'; finale.appendChild(d); }
     setTimeout(function(){ $$('.confetti', finale).forEach(function(c){ c.remove(); }); }, 12000);
   }

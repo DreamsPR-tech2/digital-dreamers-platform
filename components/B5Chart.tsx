@@ -11,8 +11,8 @@ export default function B5Chart({ data, h = 190 }: { data: Record<DomainId, (num
   ends.sort((a, b) => a.y - b.y); for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < 13) ends[i].y = ends[i - 1].y + 13; // keep labels apart
   return (
     <svg className="chart" viewBox={`0 0 ${W} ${h}`} width="100%" role="img" aria-label="Big 5 progress by month">
-      {[0, 50, 100].map(v => <g key={v}><line x1={P.l} x2={P.l + iw} y1={y(v)} y2={y(v)} stroke="#E1E6EB" strokeDasharray={v ? '3 4' : undefined} /><text x={P.l - 6} y={y(v) + 4} fontSize="10" textAnchor="end" fill="#5A6572">{v}</text></g>)}
-      {MONTHS.map((m, i) => <text key={m} x={x(i)} y={h - 8} fontSize="11" textAnchor="middle" fill="#5A6572" fontWeight={i === 3 ? 700 : 500}>{m}</text>)}
+      {[0, 50, 100].map(v => <g key={v}><line x1={P.l} x2={P.l + iw} y1={y(v)} y2={y(v)} stroke="#DCE3EA" strokeDasharray={v ? '3 4' : undefined} /><text x={P.l - 6} y={y(v) + 4} fontSize="10" textAnchor="end" fill="#687385">{v}</text></g>)}
+      {MONTHS.map((m, i) => <text key={m} x={x(i)} y={h - 8} fontSize="11" textAnchor="middle" fill="#687385" fontWeight={i === 3 ? 700 : 500}>{m}</text>)}
       {BIG5.map(d => { const s = data[d.id]; let path = '', pen = false;
         s.forEach((v, i) => { if (v === null) { pen = false; return; } path += (pen ? 'L' : 'M') + x(i) + ' ' + y(v) + ' '; pen = true; });
         return <g key={d.id}><path d={path} fill="none" stroke={d.color} strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round" />

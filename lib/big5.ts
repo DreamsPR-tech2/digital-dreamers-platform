@@ -23,17 +23,17 @@ export const BIG5: Domain[] = [
     { id: 'ol2', text: 'Uses 2–3 word phrases in any language or mode' },
     { id: 'ol3', text: 'Shows or names the unit’s key words' },
     { id: 'ol4', text: 'Asks or answers a question about the story' }] },
-  { id: 'pa', name: 'Phonological Awareness', es: 'Conciencia fonológica', color: '#B8780A', elof: 'P-LIT 1', ind: [
+  { id: 'pa', name: 'Phonological Awareness', es: 'Conciencia fonológica', color: '#FFC20E', elof: 'P-LIT 1', ind: [
     { id: 'pa1', text: 'Claps the syllables of names and words' },
     { id: 'pa2', text: 'Recognises two rhyming words' },
     { id: 'pa3', text: 'Isolates the initial sound of a word' },
     { id: 'pa4', text: 'Joins in sound games, songs and chants' }] },
-  { id: 'ak', name: 'Alphabet Knowledge & Early Writing', es: 'Conocimiento del alfabeto', color: '#1FA594', elof: 'P-LIT 4 · P-LIT 5 · P-LIT 6', ind: [
+  { id: 'ak', name: 'Alphabet Knowledge & Early Writing', es: 'Conocimiento del alfabeto', color: '#00BFAE', elof: 'P-LIT 4 · P-LIT 5 · P-LIT 6', ind: [
     { id: 'ak1', text: 'Recognises the first letter of their name' },
     { id: 'ak2', text: 'Names or points to three or more letters' },
     { id: 'ak3', text: 'Links a letter to its sound' },
     { id: 'ak4', text: 'Makes marks, strokes or letters to write' }] },
-  { id: 'cp', name: 'Comprehension & Print Concepts', es: 'Comprensión y lo impreso', color: '#7A4FBF', elof: 'P-LIT 2 · P-LIT 3', ind: [
+  { id: 'cp', name: 'Comprehension & Print Concepts', es: 'Comprensión y lo impreso', color: '#7B61FF', elof: 'P-LIT 2 · P-LIT 3', ind: [
     { id: 'cp1', text: 'Holds the book and turns pages front to back' },
     { id: 'cp2', text: 'Points to where to read (text, not picture)' },
     { id: 'cp3', text: 'Answers who or what about the story (any mode)' },
