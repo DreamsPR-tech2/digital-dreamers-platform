@@ -249,6 +249,9 @@ footer b{color:var(--yellow)}
 .pg-text{justify-content:center;gap:14px;padding:28px 34px 16px}
 .pg-text .pg-txt{gap:12px}
 .pg-text em{position:absolute;right:20px;bottom:12px}
+.pg-end{align-items:center;justify-content:center;text-align:center;gap:6px}
+.pg-end b{font-family:var(--display);font-weight:800;white-space:nowrap;font-size:clamp(34px,4vw,72px);line-height:1;color:var(--navy)}
+.pg-end i{font-size:clamp(22px,2.4vw,40px);color:var(--muted)}
 .leaf{position:absolute;top:0;bottom:0;width:50%;z-index:3;transform-style:preserve-3d;transition:transform .75s cubic-bezier(.45,.05,.25,1)}
 .leaf.fwd{left:50%;transform-origin:left center}
 .leaf.back{left:0;transform-origin:right center}
@@ -578,6 +581,7 @@ footer b{color:var(--yellow)}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 /* open box: new box bodies fill the height (the generic present rule sets body children to flex:0 0 auto) */
 .panel.presenting .body>.today,.panel.presenting .body>.bb,.panel.presenting .body>.mv,.panel.presenting .body>.wall,.panel.presenting .body>.ltrs{flex:1 1 auto;min-height:0}
+.panel.presenting .body>.wl{flex:1 1 0;height:0;min-height:0}   /* Word wall + Letters fill the open box exactly */
 .panel.big .bbt .bi{font-size:14px}
 
 /* ---- Lesson flow switch: off hides the sidebar and gives the boxes the full width ---- */
@@ -616,6 +620,15 @@ header{grid-template-columns:auto 1fr auto auto}
 .panel.big .wl-card{display:flex}
 .wc{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;gap:8px;background:#fff;border:4px solid var(--lc,var(--c));border-radius:22px;padding:12px;animation:popin .45s cubic-bezier(.3,1.5,.4,1) both}
 .wc .phd,.wc .media{flex:1;min-height:0;width:100%;--pc:var(--lc,var(--c))}
+/* Word wall and Letters card: the list and the card share the box height; the photo fills what is left under the
+   word, cropped to fit, with rounded corners that follow the card */
+.wl{grid-template-rows:minmax(0,1fr)}
+.wl-card{overflow:hidden}
+.wc{overflow:hidden;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:minmax(0,1fr) auto;align-items:center;column-gap:18px;row-gap:10px}
+.wc .media,.wc .phd{grid-column:1/-1;grid-row:1;width:100%;height:100%;min-height:0;object-fit:cover;object-position:center 35%;border-radius:14px}
+.wc .L{grid-column:1;grid-row:2}
+.wc .wc-w{grid-column:2;grid-row:2;align-items:flex-start;text-align:left}
+.wc .speak{grid-column:3;grid-row:2}
 .wc .L{font-family:var(--display);font-weight:800;font-size:64px;line-height:.95;color:var(--lc)}
 .wc .L span{font-size:.7em;margin-left:4px}
 .wc-w{align-items:center;font-family:var(--display);font-size:36px;color:var(--navy);line-height:1.05}

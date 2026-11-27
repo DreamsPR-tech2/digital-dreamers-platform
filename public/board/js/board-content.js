@@ -110,7 +110,8 @@ window.WEHELP = {
   ],
 
   // Box 7. Read together: "The Lost Phone / El teléfono perdido" (DREAMS bilingual reader, revFinal), one version per level.
-  // Story pages only (book pages x-03 to x-14); `no` is the page number printed in the paper book.
+  // Story pages (book pages x-03 to x-14; `no` is the page number printed in the paper book), then a closing
+  // "The End / Fin" page (`end: true`) at every level.
   // Pictures were taken from the PDFs into img/reader/. Most are shared across levels; pages 06, 13 and 14 differ.
   // `seq` = for each card count, which story pages (index into pages) box 8 uses for picture sequencing, in story order.
   // The book's own retell is: phone missing → Lily asks for help → the cleaner returns the phone.
@@ -153,7 +154,8 @@ window.WEHELP = {
         es: 'Nos detenemos. Vamos. Ayudamos. ¡Puedo hacerlo!' },
       { no: '1-14', time: '2:00 p.m.', timeEs: '2:00 p.m.', img: 'img/reader/p14.jpg',
         en: 'At home, I charge my phone. Twelve missed calls. All from Mom!',
-        es: 'En casa, cargo mi teléfono. ¡Doce llamadas perdidas! ¡Todas de mamá!' } ] },
+        es: 'En casa, cargo mi teléfono. ¡Doce llamadas perdidas! ¡Todas de mamá!' },
+      { end: true, img: 'img/reader/cover.jpg', en: 'The End', es: 'Fin' } ] },
     2: { label: 'Level 2', labelEs: 'Nivel 2', kind: 'Longer sentences', kindEs: 'Oraciones más largas', seq: { 2: [1, 9], 3: [1, 2, 9], 5: [1, 2, 5, 8, 9] }, pages: [
       { no: '2-03', time: '12:00 p.m.', timeEs: '12:00 p.m.', img: 'img/reader/p03.jpg',
         en: 'It is Saturday in San Juan. Practice is over. I want to text Mom.',
@@ -190,7 +192,8 @@ window.WEHELP = {
         es: '¿Qué puedo hacer ahora? Puedo llamar a mamá. Primero tengo que cargar mi teléfono.' },
       { no: '2-14', time: '2:00 p.m.', timeEs: '2:00 p.m.', img: 'img/reader/p14.jpg',
         en: 'At home, I charge my phone. Bzzz! Twelve missed calls. All from Mom!',
-        es: 'En casa, cargo mi teléfono. ¡Bzzz! ¡Doce llamadas perdidas! ¡Todas de mamá!' } ] },
+        es: 'En casa, cargo mi teléfono. ¡Bzzz! ¡Doce llamadas perdidas! ¡Todas de mamá!' },
+      { end: true, img: 'img/reader/cover.jpg', en: 'The End', es: 'Fin' } ] },
     3: { label: 'Level 3', labelEs: 'Nivel 3', kind: 'Story', kindEs: 'Cuento', seq: { 2: [1, 9], 3: [1, 2, 9], 5: [1, 2, 5, 8, 9] }, pages: [
       { no: '3-03', time: '12:00 p.m.', timeEs: '12:00 p.m.', img: 'img/reader/p03.jpg',
         en: 'It is Saturday in San Juan, and practice is over. I reach for my phone to text Mom.',
@@ -227,7 +230,8 @@ window.WEHELP = {
         es: '¿Qué puedo hacer ahora? Puedo avisarle a mamá. En casa, cargo mi teléfono. ¡Bzzz! Doce llamadas perdidas. Todas de mamá. ¡Uy!' },
       { no: '3-14', time: 'One week later', timeEs: 'Una semana después', img: 'img/reader/p14-L3.jpg',
         en: 'A week later, I see a wallet outside the school office. This time, someone else needs help. What could I do to help the owner get it back?',
-        es: 'Una semana después, veo una billetera frente a la oficina escolar. Esta vez, otra persona necesita ayuda. ¿Qué puedo hacer para que su dueño la recupere?' } ] }
+        es: 'Una semana después, veo una billetera frente a la oficina escolar. Esta vez, otra persona necesita ayuda. ¿Qué puedo hacer para que su dueño la recupere?' },
+      { end: true, img: 'img/reader/cover.jpg', en: 'The End', es: 'Fin' } ] }
   },
 
   // Box 8. How many pictures to put in order at each class level (toolkit: 2 at the lowest, up to 5 at the highest).

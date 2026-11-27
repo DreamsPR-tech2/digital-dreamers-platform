@@ -258,11 +258,14 @@
     var pages = r.pages, i = Math.max(0, Math.min(state.page, pages.length-1)); state.page = i;
     showSpread(pages, i, L);
     $('#rdLvl').innerHTML = L ? bi(r.label+' · '+r.kind, r.labelEs+' · '+r.kindEs) : bi('Level 1 (preview) · '+r.kind, 'Nivel 1 (vista previa) · '+r.kindEs);
-    $('#rdPage').innerHTML = bi('Page '+pages[i].no+' · '+(i+1)+' of '+pages.length, 'Página '+pages[i].no+' · '+(i+1)+' de '+pages.length);
+    $('#rdPage').innerHTML = pages[i].end ? bi('The End · '+(i+1)+' of '+pages.length, 'Fin · '+(i+1)+' de '+pages.length)
+      : bi('Page '+pages[i].no+' · '+(i+1)+' of '+pages.length, 'Página '+pages[i].no+' · '+(i+1)+' de '+pages.length);
   }
   // One story page per spread: the picture on the left page, the words on the right page.
-  function picPage(p){ return '<div class="pg pg-pic">'+media(p.img, 'Page '+p.no)+'<span class="pg-t">'+bi(p.time, p.time===p.timeEs?'':p.timeEs)+'</span></div>'; }
-  function txtPage(p){ return '<div class="pg pg-text"><div class="pg-txt"><b>'+bigWords(p.en)+'</b><i>'+esc(p.es)+'</i></div><em>'+esc(p.no)+'</em></div>'; }
+  function picPage(p){ return '<div class="pg pg-pic">'+media(p.img, p.end ? C.book.title : 'Page '+p.no)+(p.time ? '<span class="pg-t">'+bi(p.time, p.time===p.timeEs?'':p.timeEs)+'</span>' : '')+'</div>'; }
+  // The last page of every level: "The End" in English, "Fin" in Spanish underneath
+  function txtPage(p){ if(p.end) return '<div class="pg pg-text pg-end"><b>'+esc(p.en)+'</b><i>'+esc(p.es)+'</i></div>';
+    return '<div class="pg pg-text"><div class="pg-txt"><b>'+bigWords(p.en)+'</b><i>'+esc(p.es)+'</i></div><em>'+esc(p.no)+'</em></div>'; }
   // Page turn: going forward, the right page lifts and turns over to the left (its back is the next picture);
   // going back, the left page turns over to the right. The pages underneath are already the new ones.
   var shown = null, flipT = null;
