@@ -94,18 +94,19 @@ window.WEHELP = {
 
   // Box 6. Letters.
   letters: [
-    { L: 'H', word: 'help', es: 'ayuda', color: '#2E86D1', img: null },
-    { L: 'D', word: 'do',   es: 'hacer', color: '#E63946', img: null },
-    { L: 'S', word: 'see',  es: 'ver',   color: '#3FA35B', img: null },
-    { L: 'G', word: 'go',   es: 'ir',    color: '#7A4FBF', img: null }
+    { L: 'H', word: 'help', es: 'ayudar', color: '#2E86D1', img: 'img/word-help.jpg' },
+    { L: 'D', word: 'do',   es: 'hacer', color: '#E63946', img: 'img/word-do.jpg' },
+    { L: 'S', word: 'see',  es: 'ver',   color: '#3FA35B', img: 'img/word-see.jpg' },
+    { L: 'G', word: 'go',   es: 'ir',    color: '#7A4FBF', img: 'img/word-go.jpg' }
   ],
   // Box 5. Word wall: the five unit words, one at a time. The speaker button says the English word aloud.
+  // Photos and Spanish (infinitives: ayudar, hacer, ver, ir, parar) from the Power Word cards (Nov 27). Letters reuse them.
   words: [
-    { en: 'help', es: 'ayuda', img: null },
-    { en: 'do',   es: 'hacer', img: null },
-    { en: 'see',  es: 'ver',   img: null },
-    { en: 'go',   es: 'ir',    img: null },
-    { en: 'stop', es: 'parar', img: null }
+    { en: 'help', es: 'ayudar', img: 'img/word-help.jpg' },
+    { en: 'do',   es: 'hacer', img: 'img/word-do.jpg' },
+    { en: 'see',  es: 'ver',   img: 'img/word-see.jpg' },
+    { en: 'go',   es: 'ir',    img: 'img/word-go.jpg' },
+    { en: 'stop', es: 'parar', img: 'img/word-stop.jpg' }
   ],
 
   // Box 7. Read together: "The Lost Phone / El teléfono perdido" (DREAMS bilingual reader, revFinal), one version per level.
