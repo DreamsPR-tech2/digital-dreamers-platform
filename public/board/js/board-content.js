@@ -67,13 +67,13 @@ window.WEHELP = {
       helper: 'teacher', helperEs: 'maestra',
       move: 'Open the book.', moveEs: 'Abre el libro.',
       how: 'Arms together, then open wide.', howEs: 'Junta los brazos y ábrelos.' },
-    { id: 'mall', landmark: 'Plaza Las Américas', city: 'San Juan', color: '#7B61FF', img: 'img/place-mall.jpg',
+    { id: 'mall', landmark: 'Plaza Las Américas', city: 'San Juan', color: '#E2559A', img: 'img/place-mall.jpg',
       en: 'Mall', es: 'Centro comercial',
       goEn: 'Go to the mall.', goEs: 'Ve al centro comercial.',
       helper: 'cashier', helperEs: 'cajero',
       move: 'Scan the groceries.', moveEs: 'Escanea la compra.',
       how: 'Hold the item. Twist side to side.', howEs: 'Sostén el artículo. Gira de lado a lado.' },
-    { id: 'fort', landmark: 'El Morro', city: 'San Juan', color: '#1D4ED8', img: 'img/place-fort.jpg',
+    { id: 'fort', landmark: 'El Morro', city: 'San Juan', color: '#3FA35B', img: 'img/place-fort.jpg',
       en: 'Fort', es: 'Fuerte',
       goEn: 'Go to the fort.', goEs: 'Ve al fuerte.',
       helper: 'park ranger', helperEs: 'guardaparques',
@@ -96,8 +96,8 @@ window.WEHELP = {
   letters: [
     { L: 'H', word: 'help', es: 'ayudar', color: '#2E86D1', img: 'img/word-help.jpg' },
     { L: 'D', word: 'do',   es: 'hacer', color: '#E63946', img: 'img/word-do.jpg' },
-    { L: 'S', word: 'see',  es: 'ver',   color: '#1D4ED8', img: 'img/word-see.jpg' },
-    { L: 'G', word: 'go',   es: 'ir',    color: '#7B61FF', img: 'img/word-go.jpg' }
+    { L: 'S', word: 'see',  es: 'ver',   color: '#3FA35B', img: 'img/word-see.jpg' },
+    { L: 'G', word: 'go',   es: 'ir',    color: '#7A4FBF', img: 'img/word-go.jpg' }
   ],
   // Box 5. Word wall: the five unit words, one at a time. The speaker button says the English word aloud.
   // Photos and Spanish (infinitives: ayudar, hacer, ver, ir, parar) from the Power Word cards (Nov 27). Letters reuse them.

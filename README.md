@@ -81,13 +81,18 @@ The platform's copies also use their own browser-storage keys (`dreams-platform:
 - Fonts: Baloo 2 ExtraBold for headings and display, Nunito (400, 600, 700, italic) for text. Self-hosted in
   `public/fonts/` and `public/board/fonts/` (Fontsource 5.3.0, OFL), no CDN.
 - Colours: primary palette (Blue #2E86D1, Yellow #FFC20E, Red #E63946, Charcoal #2B2B2B, Light Neutral #F6F6F6),
-  navy #102A5E for headings and structure, guide tints for callouts. One alternate palette, Bold Creative
-  (Deep Blue, Coral, Teal, Purple), only for categories: board boxes and Big 5 domains.
-- Board boxes: 1 Today blue · 2 Plan navy · 3 Brain Break teal · 4 Move together red · 5 Word wall yellow ·
-  6 Letters purple · 7 Read together coral · 8 Comprehension deep blue. Navy text on the light fills (`--cNt`).
+  navy #102A5E for headings and structure, guide tints for callouts. Big 5 domains use the primary palette plus
+  Bold Creative (Teal #00BFAE, Purple #7B61FF).
+- **Exception (approved Nov 27): the classroom board and the lesson parts keep their own box colours.** The board
+  (`public/board/css/board.css`) is unchanged apart from the fonts, and the iPad Lesson parts use the same values
+  (`--c1`–`--c9`, `--green`, `--orange`, `--pink`, `--plum` in `app/globals.css`):
+  1 Today gold #E0A800 · 2 Plan green #3FA35B · 3 Brain Break purple #7A4FBF · 4 Move together orange #F28C28 ·
+  5 Word wall red #E63946 · 6 Letters blue #2E86D1 · 7 Read together pink #E2559A · 8 Comprehension teal #1FA594.
+  Letter and game-place colours on the board are unchanged too. Don't remap these to the guide palette.
 - Gaps filled: status colours (teal ok, yellow flag, red no, grey wait), reader levels and readiness groups on one
   blue scale (no red for Level 1), light-only colour scheme, 13px caption floor, sentence case, flat cards (no
-  shadows or gradients except the reader's page-turn shading and the skipped-box stripes).
+  shadows or gradients except the reader's page-turn shading and the skipped-box stripes). These apply to the
+  iPad pages; the board keeps its original look (shadows, tinted box bodies) apart from the fonts.
 
 ### New data the platform records
 Saved on each child in the same store, so in synced mode it goes to `students.meta` and syncs like the pilot's other

@@ -18,22 +18,25 @@
   --blue: #2E86D1; --red: #E63946; --yellow: #FFC20E; --charcoal: #2B2B2B; --neutral: #F6F6F6;
   --navy: #102A5E; --navy-d: #0B1F47; --blue-d: #1F67A8;            /* navy: headings and structure (guide text colour) */
   /* Guide tints (callouts, notes, do / don't) */
-  --blue-soft: #EAF5FC; --gold-soft: #FFF9E6; --green-soft: #ECF8F2; --red-soft: #FFF0F1; --mist: #CFE5F6;
+  --blue-soft: #EAF5FC; --gold-soft: #FFF9E6; --red-soft: #FFF0F1; --mist: #CFE5F6;
   /* Alternate palette: Bold Creative (the one alternate palette, used only for categories: board boxes, Big 5 domains) */
-  --deep-blue: #1D4ED8; --coral: #FF6B6B; --teal: #00BFAE; --plum: #7B61FF;
-  --teal-d: #00796E; --teal-soft: #E6F8F6; --plum-soft: #F0EDFF; --coral-soft: #FFF0EE;
+  --deep-blue: #1D4ED8; --coral: #FF6B6B; --teal: #00BFAE;
+  --teal-d: #00796E; --teal-soft: #E6F8F6; --coral-soft: #FFF0EE;
   /* Text-safe darks for colours that are too light for text (yellow and red are never paragraph text) */
   --gold: #8A5A00; --gold-b: #FFC20E; --red-d: #B52A36;
   /* Older names kept so nothing breaks; they now point at brand colours */
-  --green: var(--teal); --orange: var(--coral); --orange-soft: var(--coral-soft); --pink: var(--coral);
+  /* Lesson-part colours used by Lesson controls (Brain Break purple, game orange, GO green, Read pink): same as the board */
+  --green: #3FA35B; --green-soft: #E6F5EA; --orange: #F28C28; --orange-soft: #FEF0E2; --pink: #E2559A; --plum: #7A4FBF; --plum-soft: #F0EAF9;
   --ink: #2B2B2B; --ink-2: #102A5E; --ink-3: #687385; --line: #DCE3EA; --canvas: #F6F6F6; --card: #fff; --no-soft: #EEF1F4;
   --ok: #00796E; --sup: #8A5A00; --no: #8A94A3;
   --r: 14px; --r-sm: 10px;
   --shadow: none;   /* guide: no shadows or gradients; cards use a 1px line instead */
   /* Type */
   --display: 'Baloo 2', 'Nunito', system-ui, sans-serif; --body: 'Nunito', system-ui, sans-serif;
-  /* Board box colours (same as the classroom board) */
-  --c1: #7B61FF; --c2: #102A5E; --c3: #00BFAE; --c4: #FFC20E; --c5: #FF6B6B; --c6: #102A5E; --c7: #1D4ED8; --c8: #E63946; --c9: #2E86D1;
+  /* Lesson parts = board box colours. Kept from the board as approved (Nov 27), an exception to the brand guide's
+   * one-alternate-palette rule: Today gold, Plan green, Brain Break purple, Move together orange, Word wall red,
+   * Letters blue, Read together pink, Comprehension teal. */
+  --c1: #2E86D1; --c2: #3FA35B; --c3: #7A4FBF; --c4: #E63946; --c5: #E2559A; --c6: #2A3D66; --c7: #1FA594; --c8: #F28C28; --c9: #E0A800;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
